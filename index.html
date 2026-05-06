@@ -98,7 +98,7 @@
                     <div class="bg-white p-6 rounded-xl shadow mb-6"><p class="text-gray-500">ส่วนแสดงผลกราฟและสถิติ (รอการพัฒนาตามข้อมูลจริง)</p></div>
                 </div>
 
-                <!-- 2. ตั้งค่าข้อคำถาม (เพิ่มใหม่ตามคำขอ) -->
+                <!-- 2. ตั้งค่าข้อคำถาม -->
                 <div id="configQuestionPage" class="page-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">ตั้งค่าข้อคำถามการประเมิน</h2>
@@ -114,7 +114,8 @@
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-layer-group"></i> 1. จัดการมิติการประเมิน</h3>
                         <div class="flex flex-col md:flex-row gap-4 mb-4">
-                            <input type="hidden" id="dimId">
+                            <!-- ใช้บันทึกค่าเดิมกรณีต้องการแก้ไขลำดับมิติ -->
+                            <input type="hidden" id="oldDimNo">
                             <input type="number" id="dimNo" placeholder="ลำดับมิติ (เช่น 1)" class="border p-2 rounded md:w-1/4 outline-none">
                             <input type="text" id="dimName" placeholder="ชื่อมิติการประเมิน" class="border p-2 rounded flex-grow outline-none">
                             <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"><i class="fas fa-save"></i> บันทึกมิติ</button>
@@ -134,7 +135,8 @@
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-list-ul"></i> 2. จัดการข้อย่อย</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                            <input type="hidden" id="qId">
+                            <!-- ใช้บันทึกค่าเดิมกรณีต้องการแก้ไขรหัสข้อย่อย -->
+                            <input type="hidden" id="oldQCode">
                             <select id="qDimSelect" class="border p-2 rounded outline-none md:col-span-2">
                                 <option value="">-- เลือกลำดับและชื่อมิติ --</option>
                             </select>
@@ -263,7 +265,7 @@
             if(page === 'configQuestion') loadConfigData();
         }
 
-        // ================== ระบบตั้งค่าข้อคำถาม (มิติ & ข้อย่อย) ==================
+        // ================== ระบบตั้งค่าข้อคำถาม (แบบไม่ต้องพึ่ง ID) ==================
         
         async function loadConfigData() {
             const year = document.getElementById('configYear').value;
@@ -303,8 +305,8 @@
                         <td class="p-3 font-bold text-center">${dim.no}</td>
                         <td class="p-3">${dim.name}</td>
                         <td class="p-3 text-center">
-                            <button onclick="editDim('${dim.id}', ${dim.no}, '${dim.name}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
-                            <button onclick="delData('Config_Dimensions', '${dim.id}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
+                            <button onclick="editDim(${dim.no}, '${dim.name}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="delData('Dimension', ${dim.no})" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -313,24 +315,25 @@
         function updateDimDropdown() {
             const select = document.getElementById('qDimSelect');
             select.innerHTML = '<option value="">-- เลือกลำดับและชื่อมิติ --</option>';
+            // ใช้ dim.no เป็น Value ใน Select
             globalDimensions.forEach(dim => {
-                select.innerHTML += `<option value="${dim.id}">${dim.no}. ${dim.name}</option>`;
+                select.innerHTML += `<option value="${dim.no}">${dim.no}. ${dim.name}</option>`;
             });
         }
         function clearDimForm() {
-            document.getElementById('dimId').value = '';
+            document.getElementById('oldDimNo').value = '';
             document.getElementById('dimNo').value = '';
             document.getElementById('dimName').value = '';
         }
-        function editDim(id, no, name) {
-            document.getElementById('dimId').value = id;
+        function editDim(no, name) {
+            document.getElementById('oldDimNo').value = no;
             document.getElementById('dimNo').value = no;
             document.getElementById('dimName').value = name;
         }
         async function saveDimension() {
             const data = {
-                id: document.getElementById('dimId').value,
                 year: document.getElementById('configYear').value,
+                oldNo: document.getElementById('oldDimNo').value,
                 no: document.getElementById('dimNo').value,
                 name: document.getElementById('dimName').value
             };
@@ -356,46 +359,43 @@
             }
             
             // เรียงลำดับตามมิติ และรหัส
-            let displayQ = [...globalQuestions].map(q => {
-                let d = globalDimensions.find(dim => dim.id === q.dimId);
-                return { ...q, dimNo: d ? d.no : 999 }; // ถ้าไม่เจอมิติให้ไปอยู่ท้าย
-            }).sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
+            let displayQ = [...globalQuestions].sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
 
             displayQ.forEach(q => {
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 text-center font-bold text-blue-800">${q.dimNo === 999 ? '-' : q.dimNo}</td>
+                        <td class="p-3 text-center font-bold text-blue-800">${q.dimNo}</td>
                         <td class="p-3 font-semibold text-gray-700">${q.code}</td>
                         <td class="p-3 text-sm">${q.text}</td>
                         <td class="p-3 text-center">
-                            <button onclick="editQuestion('${q.id}', '${q.dimId}', '${q.code}', '${q.text.replace(/'/g, "\\'")}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
-                            <button onclick="delData('Config_Questions', '${q.id}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
+                            <button onclick="editQuestion(${q.dimNo}, '${q.code}', '${q.text.replace(/'/g, "\\'")}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="delData('Question', '${q.code}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             });
         }
         function clearQForm() {
-            document.getElementById('qId').value = '';
+            document.getElementById('oldQCode').value = '';
             document.getElementById('qDimSelect').value = '';
             document.getElementById('qCode').value = '';
             document.getElementById('qText').value = '';
         }
-        function editQuestion(id, dimId, code, text) {
-            document.getElementById('qId').value = id;
-            document.getElementById('qDimSelect').value = dimId;
+        function editQuestion(dimNo, code, text) {
+            document.getElementById('oldQCode').value = code;
+            document.getElementById('qDimSelect').value = dimNo;
             document.getElementById('qCode').value = code;
             document.getElementById('qText').value = text;
         }
         async function saveQuestion() {
             const data = {
-                id: document.getElementById('qId').value,
                 year: document.getElementById('configYear').value,
-                dimId: document.getElementById('qDimSelect').value,
+                oldCode: document.getElementById('oldQCode').value,
+                dimNo: document.getElementById('qDimSelect').value,
                 code: document.getElementById('qCode').value,
                 text: document.getElementById('qText').value
             };
-            if(!data.dimId || !data.code || !data.text) return Swal.fire('เตือน', 'กรุณาระบุข้อมูลให้ครบถ้วน', 'warning');
+            if(!data.dimNo || !data.code || !data.text) return Swal.fire('เตือน', 'กรุณาระบุข้อมูลให้ครบถ้วน', 'warning');
             
             Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveQuestion', data: data }) });
@@ -408,12 +408,14 @@
         }
 
         // --- ลบข้อมูลกลาง ---
-        async function delData(type, id) {
+        async function delData(type, key) {
             const conf = await Swal.fire({ title: 'ยืนยันการลบ?', text: "หากลบแล้วจะไม่สามารถกู้คืนได้", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ใช่, ลบเลย' });
             if(conf.isConfirmed) {
                 Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                let action = type === 'Config_Dimensions' ? 'deleteDimension' : 'deleteQuestion';
-                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: action, id: id }) });
+                const year = document.getElementById('configYear').value;
+                let action = type === 'Dimension' ? 'deleteDimension' : 'deleteQuestion';
+                
+                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: action, year: year, key: key }) });
                 let result = await res.json();
                 if(result.status === 'success') {
                     Swal.fire('สำเร็จ', 'ลบข้อมูลแล้ว', 'success');
