@@ -20,7 +20,6 @@
         .page-section { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Color Coding (คะแนนประเมิน) */
         .score-green { background-color: #a7f3d0 !important; color: #065f46; font-weight: bold; }
         .score-yellow { background-color: #fef08a !important; color: #854d0e; font-weight: bold; }
         .score-orange { background-color: #fed7aa !important; color: #9a3412; font-weight: bold; }
@@ -29,7 +28,6 @@
         table { border-collapse: collapse; }
         th, td { border: 1px solid #cbd5e1; }
 
-        /* สไตล์สีตารางสถิติ (Tracking) */
         .bg-exec { background-color: #fcd34d; } 
         .bg-med { background-color: #bbf7d0; } 
         .bg-sup-med { background-color: #bae6fd; } 
@@ -139,9 +137,7 @@
                 <!-- ================== 1. Dashboard Page ================== -->
                 <div id="dashboardPage" class="page-section">
                     <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">Dashboard ภาพรวมผลประเมินวัฒนธรรมความปลอดภัย</h2>
-                    <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10">
-                        <!-- สร้างด้วย JavaScript -->
-                    </div>
+                    <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10"></div>
                 </div>
 
                 <!-- ================== 2. ตั้งค่าข้อคำถาม ================== -->
@@ -254,7 +250,8 @@
                         </select>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow mb-6 border-t-4 border-blue-600">
-                        <p class="text-sm text-gray-600 mb-4"><i class="fas fa-info-circle text-blue-500"></i> ไฟล์ Excel ต้องมีหัวตาราง: <b>ลำดับ | รหัสบุคลากร | พื้นที่ปฏิบัติงาน | กลุ่ม</b></p>
+                        <!-- อัพเดทหัวตารางที่ต้องการใหม่ -->
+                        <p class="text-sm text-gray-600 mb-4"><i class="fas fa-info-circle text-blue-500"></i> ไฟล์ Excel ต้องมีหัวตาราง: <b>ลำดับ | รหัสบุคลากร | ชื่อ - สกุล | พื้นที่ปฏิบัติงาน | กลุ่ม | ตำแหน่ง</b></p>
                         <div class="flex gap-4 items-center">
                             <input type="file" id="masterFile" accept=".xlsx, .xls" class="border p-2 rounded flex-grow">
                             <button onclick="handleFileUpload('master')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-upload"></i> อัพโหลด</button>
@@ -328,7 +325,7 @@
                         </div>
                     </div>
 
-                    <!-- ตารางเจาะลึกรายบุคคล -->
+                    <!-- ตารางเจาะลึกรายบุคคล (อัพเดทให้แสดงครบทุกช่อง) -->
                     <div class="bg-white p-6 rounded-xl shadow">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-bold text-blue-900">รายละเอียดสถานะบุคลากร</h3>
@@ -342,7 +339,15 @@
                         <div class="overflow-x-auto border rounded">
                             <table class="w-full text-left text-sm" id="detailTable">
                                 <thead class="bg-slate-100 text-blue-900">
-                                    <tr><th class="p-3">รหัสบุคลากร</th><th class="p-3">พื้นที่ (ฐานข้อมูล)</th><th class="p-3">กลุ่ม (ฐานข้อมูล)</th><th class="p-3">กลุ่ม (ที่ตอบมา)</th><th class="p-3">สถานะ</th></tr>
+                                    <tr>
+                                        <th class="p-3">รหัสบุคลากร</th>
+                                        <th class="p-3">ชื่อ - สกุล</th>
+                                        <th class="p-3">ตำแหน่ง</th>
+                                        <th class="p-3">พื้นที่ (DB)</th>
+                                        <th class="p-3">กลุ่ม (DB)</th>
+                                        <th class="p-3">กลุ่ม (ที่ตอบมา)</th>
+                                        <th class="p-3">สถานะ</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -369,7 +374,7 @@
                         </div>
                     </div>
                 </div>
-                
+
             </section>
         </main>
     </div>
@@ -386,6 +391,7 @@
         let globalResults = [];
         let chartInstances = {};
         let detailedReportData = []; // สำหรับหน้า Tracking Summary
+        let globalUsers = []; // สำหรับหน้า Admin
 
         // ------------------ ระบบ UI & Login ------------------
         function toggleAuthView(sectionId) {
@@ -725,7 +731,7 @@
             }
         }
 
-        // ------------------ ระบบ Tracking (Summary Logic) ------------------
+        // ------------------ ระบบ Tracking (Summary Logic อัพเดทใหม่) ------------------
         async function generateSummary() {
             const year = document.getElementById('summaryYear').value;
             Swal.fire({ title: 'กำลังวิเคราะห์ข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -751,8 +757,11 @@
 
             masterData.forEach(m => {
                 let sId = String(m['รหัสบุคลากร'] || '').trim();
+                let mName = String(m['ชื่อ - สกุล'] || '-').trim();
+                let mPos = String(m['ตำแหน่ง'] || '-').trim();
+                let mArea = String(m['พื้นที่ปฏิบัติงาน'] || '-').trim();
                 let mGroup = String(m['กลุ่ม'] || '').trim();
-                let mArea = String(m['พื้นที่ปฏิบัติงาน'] || '').trim();
+                
                 if(!sId) return; 
                 
                 if(stats[mGroup] !== undefined) stats[mGroup].total++;
@@ -773,7 +782,15 @@
                 }
 
                 if (status !== "ปกติ") {
-                    detailedReportData.push({ sId: sId, area: mArea, mGroup: mGroup, rGroup: r ? (r['กลุ่ม'] || '-') : '-', status: status });
+                    detailedReportData.push({ 
+                        sId: sId, 
+                        name: mName, 
+                        position: mPos, 
+                        area: mArea, 
+                        mGroup: mGroup, 
+                        rGroup: r ? (r['กลุ่ม'] || '-') : '-', 
+                        status: status 
+                    });
                 }
             });
             renderStatTable(stats); renderDetailTable();
@@ -814,7 +831,8 @@
             if(filter !== 'all') filtered = detailedReportData.filter(d => d.status === filter);
 
             if(filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-green-600 font-bold"><i class="fas fa-check-circle"></i> ไม่พบข้อมูลที่มีปัญหาในหมวดหมู่นี้</td></tr>'; return;
+                // แก้ไข colspan จาก 5 เป็น 7 ให้เต็มตาราง
+                tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-green-600 font-bold"><i class="fas fa-check-circle"></i> ไม่พบข้อมูลที่มีปัญหาในหมวดหมู่นี้</td></tr>'; return;
             }
 
             filtered.forEach(d => {
@@ -823,19 +841,25 @@
                 else if(d.status === 'incomplete') statusBadge = '<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">ไม่ครบ (ส่วน 1/2 ว่าง)</span>';
                 else if(d.status === 'wrong_group') statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">เลือกกลุ่มผิด</span>';
 
-                tbody.innerHTML += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${d.sId}</td><td class="p-3 text-gray-600">${d.area}</td><td class="p-3">${d.mGroup}</td><td class="p-3 ${d.status === 'wrong_group' ? 'text-red-500 font-bold' : ''}">${d.rGroup}</td><td class="p-3">${statusBadge}</td></tr>`;
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-semibold">${d.sId}</td>
+                        <td class="p-3 text-blue-800 font-medium">${d.name}</td>
+                        <td class="p-3 text-gray-600 text-sm">${d.position}</td>
+                        <td class="p-3 text-gray-600 text-sm">${d.area}</td>
+                        <td class="p-3">${d.mGroup}</td>
+                        <td class="p-3 ${d.status === 'wrong_group' ? 'text-red-500 font-bold' : ''}">${d.rGroup}</td>
+                        <td class="p-3">${statusBadge}</td>
+                    </tr>
+                `;
             });
         }
 
-// ------------------ ระบบจัดการ User (Admin) ------------------
-        let globalUsers = [];
-
+        // ------------------ ระบบจัดการ User (Admin) ------------------
         async function loadUsers() {
-            // ดักความปลอดภัยอีกชั้น เผื่อมีคนพยายามเข้าหน้านี้
             if(currentUser.role !== 'Admin') {
                 Swal.fire('ปฏิเสธการเข้าถึง', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้', 'error');
-                switchPage('dashboard');
-                return;
+                switchPage('dashboard'); return;
             }
             
             document.getElementById('userTable').querySelector('tbody').innerHTML = '<tr><td colspan="4" class="text-center p-4">กำลังโหลดข้อมูล...</td></tr>';
@@ -844,8 +868,7 @@
             let result = await res.json();
             
             if(result.status === 'success') {
-                globalUsers = result.data;
-                renderUserTable();
+                globalUsers = result.data; renderUserTable();
             }
         }
 
@@ -854,7 +877,6 @@
             tbody.innerHTML = '';
             
             globalUsers.forEach(u => {
-                // สร้าง Dropdown สลับ Role
                 let roleSelect = `<select onchange="changeUserRole('${u.id}', this.value)" class="border p-1 rounded outline-none font-semibold ${u.role==='Admin'?'text-red-600':'text-gray-700'}">
                     <option value="User" ${u.role==='User'?'selected':''}>User</option>
                     <option value="Admin" ${u.role==='Admin'?'selected':''}>Admin</option>
@@ -877,11 +899,8 @@
             Swal.fire({ title: 'กำลังอัพเดทสิทธิ์...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'updateUserRole', id: id, newRole: newRole }) });
             if((await res.json()).status === 'success') {
-                Swal.fire({title: 'อัพเดทสำเร็จ', icon: 'success', timer: 1000, showConfirmButton: false});
-                renderUserTable(); // อัพเดทสีอักษร
-            } else {
-                Swal.fire('ผิดพลาด', 'อัพเดทไม่สำเร็จ', 'error');
-            }
+                Swal.fire({title: 'อัพเดทสำเร็จ', icon: 'success', timer: 1000, showConfirmButton: false}); renderUserTable(); 
+            } else { Swal.fire('ผิดพลาด', 'อัพเดทไม่สำเร็จ', 'error'); }
         }
 
         async function deleteUserAccount(id) {
@@ -889,13 +908,9 @@
             if(conf.isConfirmed) {
                 Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', id: id }) });
-                if((await res.json()).status === 'success') {
-                    Swal.fire('สำเร็จ', 'ลบผู้ใช้งานเรียบร้อยแล้ว', 'success');
-                    loadUsers(); // โหลดตารางใหม่
-                }
+                if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', 'ลบผู้ใช้งานเรียบร้อยแล้ว', 'success'); loadUsers(); }
             }
         }
-        
     </script>
 </body>
 </html>
