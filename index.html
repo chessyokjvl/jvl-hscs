@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVL-HSCS | ระบบบริหารจัดการวัฒนธรรมความปลอดภัย</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center">
+        <div class="font-bold text-xl">🏥 JVL-HSCS</div>
+        <div>
+            <button id="navLoginBtn" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg" onclick="showAuthModal()">เข้าสู่ระบบ</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-6 mt-6">
+        <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-blue-600">
+            <h1 class="text-2xl font-bold text-blue-900 mb-4">ยินดีต้อนรับสู่ระบบติดตามประเมินวัฒนธรรมความปลอดภัย</h1>
+            <p class="text-gray-600 mb-6">กรุณาเข้าสู่ระบบเพื่อดำเนินการจัดการข้อมูล สถิติ และตรวจสอบผลลัพธ์รายบุคคล</p>
+            
+            <!-- Chart Area (สำหรับแสดงหลัง Login) -->
+            <div id="dashboardArea" class="hidden">
+                <canvas id="cultureChart" class="w-full max-w-2xl mx-auto"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Login / Register -->
+    <div id="authModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-8 rounded-xl shadow-xl w-96 relative">
+            <button onclick="closeAuthModal()" class="absolute top-2 right-4 text-gray-500 hover:text-red-500 text-xl">&times;</button>
+            <h2 class="text-xl font-bold text-blue-800 mb-4" id="modalTitle">เข้าสู่ระบบ</h2>
+            
+            <input type="text" id="username" placeholder="Username" class="w-full mb-3 p-2 border rounded focus:ring-2 focus:ring-blue-400">
+            <input type="password" id="password" placeholder="Password" class="w-full mb-3 p-2 border rounded focus:ring-2 focus:ring-blue-400">
+            <input type="email" id="email" placeholder="Email (สำหรับสมัคร/ลืมรหัส)" class="w-full mb-3 p-2 border rounded hidden focus:ring-2 focus:ring-blue-400">
+            
+            <button onclick="handleAuth()" class="w-full bg-blue-700 text-white p-2 rounded hover:bg-blue-800 transition" id="actionBtn">เข้าสู่ระบบ</button>
+            
+            <div class="flex justify-between text-sm text-blue-600 mt-4 cursor-pointer">
+                <span onclick="toggleRegister()">สมัครสมาชิก</span>
+                <span onclick="forgotPassword()">ลืมรหัสผ่าน?</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // เอา URL Web App ที่ได้จาก Apps Script มาใส่ที่นี่
+        const API_URL = "https://script.google.com/macros/s/AKfycbx_GAxtZMhekPRzuACeau5CaMmIXwsPKRLOIoYAvfwiWj6l3W6zLcE7z4KTxlHXlQuTDQ/exec"; 
+        let isRegistering = false;
+
+        function showAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function toggleRegister() {
+            isRegistering = !isRegistering;
+            document.getElementById('modalTitle').innerText = isRegistering ? "สมัครสมาชิก" : "เข้าสู่ระบบ";
+            document.getElementById('actionBtn').innerText = isRegistering ? "สมัครสมาชิก" : "เข้าสู่ระบบ";
+            document.getElementById('email').classList.toggle('hidden');
+        }
+
+        async function handleAuth() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            const action = isRegistering ? "register" : "login";
+
+            if(!user || !pass) return Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
+
+            // แสดง Loading
+            Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: action, username: user, password: pass, email: email })
+            });
+            const result = await response.json();
+
+            if(result.status === "success") {
+                Swal.fire('สำเร็จ!', result.message || 'เข้าสู่ระบบสำเร็จ', 'success');
+                if(action === "login") {
+                    closeAuthModal();
+                    document.getElementById('navLoginBtn').innerText = `ผู้ใช้: ${result.username} (${result.role})`;
+                    // ปลดล็อคฟังก์ชันอื่นๆ ตาม Role ตรงนี้
+                }
+            } else {
+                Swal.fire('ข้อผิดพลาด', result.message, 'error');
+            }
+        }
+
+        async function forgotPassword() {
+            const email = prompt("กรุณากรอก Email ที่ใช้สมัคร:");
+            if(!email) return;
+            
+            Swal.fire({ title: 'กำลังส่งรหัสผ่านใหม่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            const response = await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "forgot_password", email: email })
+            });
+            const result = await response.json();
+            Swal.fire(result.status === "success" ? 'สำเร็จ' : 'ล้มเหลว', result.message, result.status);
+        }
+    </script>
+</body>
+</html>
