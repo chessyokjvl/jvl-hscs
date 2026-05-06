@@ -152,7 +152,6 @@
                         </div>
                     </div>
 
-                    <!-- จัดการมิติ -->
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-layer-group"></i> 1. จัดการมิติการประเมิน</h3>
                         <div class="flex flex-col md:flex-row gap-4 mb-4">
@@ -170,7 +169,6 @@
                         </div>
                     </div>
 
-                    <!-- จัดการข้อย่อย -->
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-list-ul"></i> 2. จัดการข้อย่อย</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
@@ -250,7 +248,6 @@
                         </select>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow mb-6 border-t-4 border-blue-600">
-                        <!-- อัพเดทหัวตารางที่ต้องการใหม่ -->
                         <p class="text-sm text-gray-600 mb-4"><i class="fas fa-info-circle text-blue-500"></i> ไฟล์ Excel ต้องมีหัวตาราง: <b>ลำดับ | รหัสบุคลากร | ชื่อ - สกุล | พื้นที่ปฏิบัติงาน | กลุ่ม | ตำแหน่ง</b></p>
                         <div class="flex gap-4 items-center">
                             <input type="file" id="masterFile" accept=".xlsx, .xls" class="border p-2 rounded flex-grow">
@@ -325,21 +322,27 @@
                         </div>
                     </div>
 
-                    <!-- ตารางเจาะลึกรายบุคคล (อัพเดทให้แสดงครบทุกช่อง) -->
+                    <!-- ตารางเจาะลึกรายบุคคล -->
                     <div class="bg-white p-6 rounded-xl shadow">
-                        <div class="flex justify-between items-center mb-4">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                             <h3 class="text-lg font-bold text-blue-900">รายละเอียดสถานะบุคลากร</h3>
-                            <select id="filterStatus" class="border p-2 rounded outline-none shadow-sm" onchange="renderDetailTable()">
-                                <option value="all">ดูทั้งหมด</option>
-                                <option value="not_started">ยังไม่ได้ทำการประเมิน</option>
-                                <option value="incomplete">ทำการประเมินยังไม่ครบ</option>
-                                <option value="wrong_group">เลือกกลุ่มผิด</option>
-                            </select>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <select id="filterStatus" class="border p-2 rounded outline-none shadow-sm" onchange="renderDetailTable()">
+                                    <option value="all">ดูทั้งหมด</option>
+                                    <option value="not_started">ยังไม่ได้ทำการประเมิน</option>
+                                    <option value="incomplete">ทำการประเมินยังไม่ครบ</option>
+                                    <option value="wrong_group">เลือกกลุ่มผิด</option>
+                                </select>
+                                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow transition flex items-center gap-2"><i class="fas fa-file-excel"></i> Export</button>
+                                <button onclick="printTable()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded shadow transition flex items-center gap-2"><i class="fas fa-print"></i> Print</button>
+                            </div>
                         </div>
+                        
                         <div class="overflow-x-auto border rounded">
                             <table class="w-full text-left text-sm" id="detailTable">
                                 <thead class="bg-slate-100 text-blue-900">
                                     <tr>
+                                        <th class="p-3 w-16 text-center">ลำดับ</th>
                                         <th class="p-3">รหัสบุคลากร</th>
                                         <th class="p-3">ชื่อ - สกุล</th>
                                         <th class="p-3">ตำแหน่ง</th>
@@ -362,12 +365,7 @@
                         <div class="overflow-x-auto border rounded">
                             <table class="w-full text-left text-sm" id="userTable">
                                 <thead class="bg-slate-100 text-blue-900">
-                                    <tr>
-                                        <th class="p-3">Username</th>
-                                        <th class="p-3">Email</th>
-                                        <th class="p-3">ระดับ (Role)</th>
-                                        <th class="p-3 text-center">จัดการ</th>
-                                    </tr>
+                                    <tr><th class="p-3">Username</th><th class="p-3">Email</th><th class="p-3">ระดับ (Role)</th><th class="p-3 text-center">จัดการ</th></tr>
                                 </thead>
                                 <tbody><!-- รันด้วย JS --></tbody>
                             </table>
@@ -731,7 +729,7 @@
             }
         }
 
-        // ------------------ ระบบ Tracking (Summary Logic อัพเดทใหม่) ------------------
+        // ------------------ ระบบ Tracking (Summary Logic อัพเดท Mapping กลุ่ม) ------------------
         async function generateSummary() {
             const year = document.getElementById('summaryYear').value;
             Swal.fire({ title: 'กำลังวิเคราะห์ข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -747,11 +745,12 @@
         }
 
         function processComparison(masterData, recordData) {
+            // อัพเดท Mapping ตาม Database
             let stats = {
-                'ผู้บริหาร': { total: 0, done: 0 },
-                'สายวิชาชีพสาธารณสุข': { total: 0, done: 0 },
-                'สายสนับสนุนทางการแพทย์': { total: 0, done: 0 },
-                'สายสนับสนุนทั่วไป': { total: 0, done: 0 }
+                'กลุ่มผู้บริหาร': { total: 0, done: 0 },
+                'กลุ่มสายวิชาชีพทางด้านสาธารณสุข': { total: 0, done: 0 },
+                'กลุ่มสนับสนุนทางการแพทย์': { total: 0, done: 0 },
+                'กลุ่มสนับสนุนทั่วไป': { total: 0, done: 0 }
             };
             detailedReportData = [];
 
@@ -776,7 +775,10 @@
 
                     if(!p1 && !p2 && !rGroup) status = "not_started";
                     else if(!p1 || !p2) status = "incomplete";
-                    else if(stats[mGroup] !== undefined) stats[mGroup].done++;
+                    else {
+                        // นับเป็น "กรอกแล้ว" แม้ว่าจะเลือกกลุ่มผิด (เพราะถือว่าส่งครบแล้ว)
+                        if(stats[mGroup] !== undefined) stats[mGroup].done++;
+                    }
 
                     if(rGroup && mGroup !== rGroup) status = "wrong_group";
                 }
@@ -788,12 +790,13 @@
                         position: mPos, 
                         area: mArea, 
                         mGroup: mGroup, 
-                        rGroup: r ? (r['กลุ่ม'] || '-') : '-', 
+                        rGroup: r ? (String(r['กลุ่ม'] || '-')) : '-', 
                         status: status 
                     });
                 }
             });
-            renderStatTable(stats); renderDetailTable();
+            renderStatTable(stats); 
+            renderDetailTable();
         }
 
         function renderStatTable(stats) {
@@ -806,14 +809,18 @@
             }
             theadTr.innerHTML = subHeadersHTML;
 
-            let order = ['ผู้บริหาร', 'สายวิชาชีพสาธารณสุข', 'สายสนับสนุนทางการแพทย์', 'สายสนับสนุนทั่วไป'];
+            // แมปชื่อตัวแปรที่ใช้ดึงค่า
+            let orderKeys = ['กลุ่มผู้บริหาร', 'กลุ่มสายวิชาชีพทางด้านสาธารณสุข', 'กลุ่มสนับสนุนทางการแพทย์', 'กลุ่มสนับสนุนทั่วไป'];
             let sumTotal = 0, sumDone = 0, sumMin = 0;
             let rowHTML = '<tr class="bg-white">';
 
-            order.forEach(g => {
-                let total = stats[g].total; let done = stats[g].done; let minReq = Math.ceil(total * 0.606); 
+            orderKeys.forEach(k => {
+                let total = stats[k].total; 
+                let done = stats[k].done; 
+                let minReq = Math.ceil(total * 0.60); // ขั้นต่ำ 60% ปัดขึ้น 
                 let pct = total > 0 ? ((done/total)*100).toFixed(2) : '0.00';
                 sumTotal += total; sumDone += done; sumMin += minReq;
+                
                 rowHTML += `<td class="p-3 border">${total}</td><td class="p-3 border text-blue-600 font-bold">${minReq}</td><td class="p-3 border text-green-600 font-bold">${done}</td><td class="p-3 border">${pct}</td>`;
             });
             let sumPct = sumTotal > 0 ? ((sumDone/sumTotal)*100).toFixed(2) : '0.00';
@@ -831,11 +838,10 @@
             if(filter !== 'all') filtered = detailedReportData.filter(d => d.status === filter);
 
             if(filtered.length === 0) {
-                // แก้ไข colspan จาก 5 เป็น 7 ให้เต็มตาราง
-                tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-green-600 font-bold"><i class="fas fa-check-circle"></i> ไม่พบข้อมูลที่มีปัญหาในหมวดหมู่นี้</td></tr>'; return;
+                tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-green-600 font-bold"><i class="fas fa-check-circle"></i> ไม่พบข้อมูลที่มีปัญหาในหมวดหมู่นี้</td></tr>'; return;
             }
 
-            filtered.forEach(d => {
+            filtered.forEach((d, index) => {
                 let statusBadge = '';
                 if(d.status === 'not_started') statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">ยังไม่ประเมิน</span>';
                 else if(d.status === 'incomplete') statusBadge = '<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">ไม่ครบ (ส่วน 1/2 ว่าง)</span>';
@@ -843,6 +849,7 @@
 
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 text-center text-gray-500">${index + 1}</td>
                         <td class="p-3 font-semibold">${d.sId}</td>
                         <td class="p-3 text-blue-800 font-medium">${d.name}</td>
                         <td class="p-3 text-gray-600 text-sm">${d.position}</td>
@@ -853,6 +860,49 @@
                     </tr>
                 `;
             });
+        }
+
+        // --- ระบบ Export & Print ---
+        function exportToExcel() {
+            const filter = document.getElementById('filterStatus').value;
+            let filtered = detailedReportData;
+            if(filter !== 'all') filtered = detailedReportData.filter(d => d.status === filter);
+            
+            if(filtered.length === 0) return Swal.fire('ไม่พบข้อมูล', 'ไม่มีข้อมูลสำหรับเงื่อนไขที่เลือก', 'warning');
+
+            const excelData = filtered.map((d, i) => ({
+                'ลำดับ': i + 1,
+                'รหัสบุคลากร': d.sId,
+                'ชื่อ - สกุล': d.name,
+                'ตำแหน่ง': d.position,
+                'พื้นที่ (DB)': d.area,
+                'กลุ่ม (DB)': d.mGroup,
+                'กลุ่ม (ที่ตอบมา)': d.rGroup,
+                'สถานะ': d.status === 'not_started' ? 'ยังไม่ได้ทำการประเมิน' : (d.status === 'incomplete' ? 'ทำการประเมินยังไม่ครบ' : 'เลือกกลุ่มผิด')
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Tracking_Details");
+            XLSX.writeFile(wb, `HSCS_Tracking_${filter}_${new Date().getTime()}.xlsx`);
+        }
+
+        function printTable() {
+            const filterText = document.getElementById('filterStatus').options[document.getElementById('filterStatus').selectedIndex].text;
+            const printContents = document.getElementById('detailTable').outerHTML;
+            const printWindow = window.open('', '', 'height=600,width=800');
+            
+            printWindow.document.write('<html><head><title>Print Report JVL-HSCS</title>');
+            printWindow.document.write('<style>body { font-family: sans-serif; padding: 20px; } h2, h3 { text-align: center; color: #1e3a8a; } table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; } th, td { border: 1px solid #ccc; padding: 8px; text-align: left; } th { background-color: #f8fafc; font-weight: bold; }</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write('<h2>รายงานรายละเอียดสถานะบุคลากร</h2>');
+            printWindow.document.write(`<h3>ตัวกรองข้อมูล: ${filterText}</h3>`);
+            printWindow.document.write(printContents);
+            printWindow.document.write('</body></html>');
+            
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         }
 
         // ------------------ ระบบจัดการ User (Admin) ------------------
