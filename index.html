@@ -4,121 +4,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JVL-HSCS | ระบบบริหารจัดการวัฒนธรรมความปลอดภัย</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; }
+        body { font-family: 'Sarabun', sans-serif; overflow-x: hidden; }
+        .sidebar-transition { transition: all 0.3s; }
+        .bg-jvl { background-color: #1e3a8a; }
+        .criteria-red { background-color: #fee2e2; color: #dc2626; border-left: 4px solid #dc2626; }
+        .criteria-orange { background-color: #ffedd5; color: #ea580c; border-left: 4px solid #ea580c; }
+        .criteria-yellow { background-color: #fef9c3; color: #ca8a04; border-left: 4px solid #ca8a04; }
+        .criteria-green { background-color: #dcfce7; color: #16a34a; border-left: 4px solid #16a34a; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50">
 
-    <!-- Navbar -->
-    <nav class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center">
-        <div class="font-bold text-xl">🏥 JVL-HSCS</div>
-        <div>
-            <button id="navLoginBtn" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg" onclick="showAuthModal()">เข้าสู่ระบบ</button>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container mx-auto p-6 mt-6">
-        <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-blue-600">
-            <h1 class="text-2xl font-bold text-blue-900 mb-4">ยินดีต้อนรับสู่ระบบติดตามประเมินวัฒนธรรมความปลอดภัย</h1>
-            <p class="text-gray-600 mb-6">กรุณาเข้าสู่ระบบเพื่อดำเนินการจัดการข้อมูล สถิติ และตรวจสอบผลลัพธ์รายบุคคล</p>
-            
-            <!-- Chart Area (สำหรับแสดงหลัง Login) -->
-            <div id="dashboardArea" class="hidden">
-                <canvas id="cultureChart" class="w-full max-w-2xl mx-auto"></canvas>
+    <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-jvl px-4">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 transform transition-all">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-blue-900">JVL-HSCS</h1>
+                <p class="text-gray-500 mt-2">รพ.จิตเวชเลยราชนครินทร์</p>
+            </div>
+            <div id="authForm">
+                <input type="text" id="username" placeholder="Username" class="w-full mb-4 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.key==='Enter') doLogin()">
+                <input type="password" id="password" placeholder="Password" class="w-full mb-6 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.key==='Enter') doLogin()">
+                <button onclick="doLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-lg shadow-lg transition">เข้าสู่ระบบ</button>
+                <div class="flex justify-between mt-6 text-sm text-blue-600">
+                    <span class="cursor-pointer hover:underline" onclick="showRegister()">สมัครสมาชิก</span>
+                    <span class="cursor-pointer hover:underline" onclick="showForgot()">ลืมรหัสผ่าน?</span>
+                </div>
+                <button onclick="guestLogin()" class="w-full mt-6 py-2 border-2 border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition">เข้าชมแบบ Guest</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Login / Register -->
-    <div id="authModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-8 rounded-xl shadow-xl w-96 relative">
-            <button onclick="closeAuthModal()" class="absolute top-2 right-4 text-gray-500 hover:text-red-500 text-xl">&times;</button>
-            <h2 class="text-xl font-bold text-blue-800 mb-4" id="modalTitle">เข้าสู่ระบบ</h2>
+    <div id="mainApp" class="hidden flex h-screen overflow-hidden">
+        <aside id="sidebar" class="bg-jvl text-white w-64 flex-shrink-0 sidebar-transition flex flex-col">
+            <div class="p-6 text-xl font-bold border-b border-blue-800">Menu</div>
+            <nav class="flex-grow p-4 space-y-2 overflow-y-auto text-sm">
+                <div class="p-3 hover:bg-blue-700 rounded cursor-pointer" onclick="switchPage('dashboard')"><i class="fas fa-chart-line mr-3"></i> Dashboard</div>
+                <div>
+                    <div class="p-3 hover:bg-blue-700 rounded cursor-pointer flex justify-between items-center" onclick="toggleAccordion('hscsSub')">
+                        <span><i class="fas fa-file-alt mr-3"></i> ผล HSCS รายปี</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </div>
+                    <div id="hscsSub" class="hidden pl-8 space-y-2 mt-2">
+                        <div class="p-2 hover:text-blue-300 cursor-pointer" onclick="switchPage('saveResult')">บันทึกผลการประเมิน</div>
+                        <div class="p-2 hover:text-blue-300 cursor-pointer">ตั้งค่าข้อคำถาม</div>
+                    </div>
+                </div>
+                <div class="p-3 hover:bg-blue-700 rounded cursor-pointer" onclick="switchPage('tracking')"><i class="fas fa-users-cog mr-3"></i> ติดตามการประเมิน</div>
+                <div id="adminMenu" class="p-3 hover:bg-blue-700 rounded cursor-pointer hidden"><i class="fas fa-user-shield mr-3"></i> จัดการ User</div>
+                <div class="p-3 hover:bg-red-700 rounded cursor-pointer mt-auto" onclick="location.reload()"><i class="fas fa-sign-out-alt mr-3"></i> Log out</div>
+            </nav>
+        </aside>
+
+        <main class="flex-grow flex flex-col">
+            <header class="bg-white shadow p-4 flex items-center justify-between">
+                <button onclick="toggleSidebar()" class="text-blue-900 text-xl"><i class="fas fa-bars"></i></button>
+                <div id="userProfile" class="text-sm font-semibold text-blue-900"></div>
+            </header>
             
-            <input type="text" id="username" placeholder="Username" class="w-full mb-3 p-2 border rounded focus:ring-2 focus:ring-blue-400">
-            <input type="password" id="password" placeholder="Password" class="w-full mb-3 p-2 border rounded focus:ring-2 focus:ring-blue-400">
-            <input type="email" id="email" placeholder="Email (สำหรับสมัคร/ลืมรหัส)" class="w-full mb-3 p-2 border rounded hidden focus:ring-2 focus:ring-blue-400">
-            
-            <button onclick="handleAuth()" class="w-full bg-blue-700 text-white p-2 rounded hover:bg-blue-800 transition" id="actionBtn">เข้าสู่ระบบ</button>
-            
-            <div class="flex justify-between text-sm text-blue-600 mt-4 cursor-pointer">
-                <span onclick="toggleRegister()">สมัครสมาชิก</span>
-                <span onclick="forgotPassword()">ลืมรหัสผ่าน?</span>
-            </div>
-        </div>
+            <section id="contentBody" class="p-6 overflow-y-auto h-full">
+                <div id="dashboardPage" class="page-section">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-900">Dashboard ประมวลผลภาพรวม</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow"><canvas id="runChart"></canvas></div>
+                        <div class="bg-white p-6 rounded-xl shadow">
+                            <h3 class="font-bold mb-4">สรุปสถิติตามมิติปี 2567</h3>
+                            <div id="zGrid" class="grid grid-cols-2 gap-4">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="trackingPage" class="page-section hidden">
+                    <h2 class="text-2xl font-bold mb-6">ระบบติดตามการตอบแบบประเมิน</h2>
+                    <div class="bg-white p-6 rounded-xl shadow mb-6">
+                        <div class="flex gap-4">
+                            <input type="file" id="importFile" class="border p-2 rounded">
+                            <button onclick="processTracking()" class="bg-green-600 text-white px-6 py-2 rounded">วิเคราะห์ข้อมูล</button>
+                            <button onclick="exportExcel()" class="bg-blue-600 text-white px-6 py-2 rounded">Export รายงาน</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto bg-white rounded shadow">
+                        <table class="w-full text-left text-sm" id="trackingTable">
+                            <thead class="bg-slate-100">
+                                <tr><th class="p-3">รหัสบุคลากร</th><th class="p-3">พื้นที่</th><th class="p-3">กลุ่ม</th><th class="p-3">สถานะ</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script>
-        // เอา URL Web App ที่ได้จาก Apps Script มาใส่ที่นี่
-        const API_URL = "https://script.google.com/macros/s/AKfycbx_GAxtZMhekPRzuACeau5CaMmIXwsPKRLOIoYAvfwiWj6l3W6zLcE7z4KTxlHXlQuTDQ/exec"; 
-        let isRegistering = false;
+        const API = "https://script.google.com/macros/s/AKfycbx_GAxtZMhekPRzuACeau5CaMmIXwsPKRLOIoYAvfwiWj6l3W6zLcE7z4KTxlHXlQuTDQ/exec";
+        let currentUser = null;
 
-        function showAuthModal() {
-            document.getElementById('authModal').classList.remove('hidden');
-        }
-
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
-        }
-
-        function toggleRegister() {
-            isRegistering = !isRegistering;
-            document.getElementById('modalTitle').innerText = isRegistering ? "สมัครสมาชิก" : "เข้าสู่ระบบ";
-            document.getElementById('actionBtn').innerText = isRegistering ? "สมัครสมาชิก" : "เข้าสู่ระบบ";
-            document.getElementById('email').classList.toggle('hidden');
-        }
-
-        async function handleAuth() {
+        async function doLogin() {
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
-            const email = document.getElementById('email').value;
-            const action = isRegistering ? "register" : "login";
+            if(!user || !pass) return Swal.fire('เตือน', 'กรุณากรอกข้อมูล', 'warning');
 
-            if(!user || !pass) return Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
+            Swal.fire({ title: 'กำลังเข้าระบบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-            // แสดง Loading
-            Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            const response = await fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: action, username: user, password: pass, email: email })
-            });
-            const result = await response.json();
-
-            if(result.status === "success") {
-                Swal.fire('สำเร็จ!', result.message || 'เข้าสู่ระบบสำเร็จ', 'success');
-                if(action === "login") {
-                    closeAuthModal();
-                    document.getElementById('navLoginBtn').innerText = `ผู้ใช้: ${result.username} (${result.role})`;
-                    // ปลดล็อคฟังก์ชันอื่นๆ ตาม Role ตรงนี้
+            try {
+                const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'login', username: user, password: pass }) });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    currentUser = result.user;
+                    initApp();
+                } else {
+                    Swal.fire('ผิดพลาด', result.message, 'error');
                 }
-            } else {
-                Swal.fire('ข้อผิดพลาด', result.message, 'error');
-            }
+            } catch (e) { Swal.fire('ผิดพลาด', 'ติดต่อ Server ไม่ได้', 'error'); }
         }
 
-        async function forgotPassword() {
-            const email = prompt("กรุณากรอก Email ที่ใช้สมัคร:");
-            if(!email) return;
+        function guestLogin() {
+            currentUser = { username: 'Guest', role: 'Guest' };
+            initApp();
+        }
+
+        function initApp() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userProfile').innerText = `ผู้ใช้: ${currentUser.username} (${currentUser.role})`;
             
-            Swal.fire({ title: 'กำลังส่งรหัสผ่านใหม่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            
-            const response = await fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "forgot_password", email: email })
+            if(currentUser.role === 'Admin') document.getElementById('adminMenu').classList.remove('hidden');
+            if(currentUser.role === 'Guest') {
+                // Disable save menus for guest
+            }
+            loadChart();
+            Swal.close();
+        }
+
+        function toggleSidebar() {
+            const side = document.getElementById('sidebar');
+            side.classList.toggle('w-0');
+            side.classList.toggle('overflow-hidden');
+        }
+
+        function toggleAccordion(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+
+        function switchPage(page) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
+            document.getElementById(page + 'Page').classList.remove('hidden');
+        }
+
+        function loadChart() {
+            const ctx = document.getElementById('runChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2564', '2565', '2566', '2567'],
+                    datasets: [{ label: 'คะแนนภาพรวม', data: [65, 72, 70, 81], borderColor: '#1e3a8a', tension: 0.1 }]
+                }
             });
-            const result = await response.json();
-            Swal.fire(result.status === "success" ? 'สำเร็จ' : 'ล้มเหลว', result.message, result.status);
+        }
+
+        // Tracking & Import Logic
+        async function processTracking() {
+            // โลจิกดึงไฟล์ CSV/Excel และส่งไป API เพื่อวิเคราะห์
+            Swal.fire('ระบบจำลอง', 'กรุณาเขียนฟังก์ชันอ่านไฟล์ CSV เพิ่มเติมเพื่อส่งข้อมูลไป processTracking ในสคริปต์', 'info');
+        }
+        
+        async function showRegister() {
+            const { value: accept } = await Swal.fire({
+                title: 'PDPA Consent',
+                html: 'ยินยอมให้ระบบจัดเก็บข้อมูลบุคลากรเพื่อการประมวลผลทางสถิติของโรงพยาบาล...',
+                input: 'checkbox',
+                inputValue: 0,
+                inputPlaceholder: 'ฉันยอมรับเงื่อนไข',
+                confirmButtonText: 'ดำเนินการต่อ <i class="fa fa-arrow-right"></i>',
+                inputValidator: (result) => { if (!result) return 'คุณต้องกดยอมรับก่อนสมัคร' }
+            });
+
+            if (accept) {
+                // Show Registration Form Swal...
+            }
         }
     </script>
 </body>
