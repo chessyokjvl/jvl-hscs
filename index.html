@@ -122,7 +122,7 @@
                     </div>
                 </div>
 
-                <div id="adminMenu" class="p-3 hover:bg-blue-700 rounded cursor-pointer hidden transition"><i class="fas fa-user-shield mr-3"></i> จัดการ User</div>
+                <div id="adminMenu" class="p-3 hover:bg-blue-700 rounded cursor-pointer hidden transition" onclick="switchPage('manageUsers')"><i class="fas fa-user-shield mr-3"></i> จัดการ User</div>
                 <div class="p-3 hover:bg-red-700 rounded cursor-pointer mt-auto transition" onclick="location.reload()"><i class="fas fa-sign-out-alt mr-3"></i> Log out</div>
             </nav>
         </aside>
@@ -350,6 +350,26 @@
                     </div>
                 </div>
 
+                <!-- ================== 5. Manage Users Page (Admin Only) ================== -->
+                <div id="manageUsersPage" class="page-section hidden">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">จัดการผู้ใช้งานระบบ (Admin Only)</h2>
+                    <div class="bg-white p-6 rounded-xl shadow border-t-4 border-red-600">
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="userTable">
+                                <thead class="bg-slate-100 text-blue-900">
+                                    <tr>
+                                        <th class="p-3">Username</th>
+                                        <th class="p-3">Email</th>
+                                        <th class="p-3">ระดับ (Role)</th>
+                                        <th class="p-3 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody><!-- รันด้วย JS --></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
             </section>
         </main>
     </div>
@@ -436,6 +456,7 @@
             if(page === 'uploadMaster') loadTrackingStatus('master');
             if(page === 'uploadRecord') loadTrackingStatus('record');
             if(page === 'trackingSummary') generateSummary();
+            if(page === 'manageUsers') loadUsers();
         }
 
         // ------------------ ระบบ Config ข้อคำถาม ------------------
@@ -805,6 +826,76 @@
                 tbody.innerHTML += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${d.sId}</td><td class="p-3 text-gray-600">${d.area}</td><td class="p-3">${d.mGroup}</td><td class="p-3 ${d.status === 'wrong_group' ? 'text-red-500 font-bold' : ''}">${d.rGroup}</td><td class="p-3">${statusBadge}</td></tr>`;
             });
         }
+
+// ------------------ ระบบจัดการ User (Admin) ------------------
+        let globalUsers = [];
+
+        async function loadUsers() {
+            // ดักความปลอดภัยอีกชั้น เผื่อมีคนพยายามเข้าหน้านี้
+            if(currentUser.role !== 'Admin') {
+                Swal.fire('ปฏิเสธการเข้าถึง', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้', 'error');
+                switchPage('dashboard');
+                return;
+            }
+            
+            document.getElementById('userTable').querySelector('tbody').innerHTML = '<tr><td colspan="4" class="text-center p-4">กำลังโหลดข้อมูล...</td></tr>';
+            
+            let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getUsers' }) });
+            let result = await res.json();
+            
+            if(result.status === 'success') {
+                globalUsers = result.data;
+                renderUserTable();
+            }
+        }
+
+        function renderUserTable() {
+            const tbody = document.getElementById('userTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            globalUsers.forEach(u => {
+                // สร้าง Dropdown สลับ Role
+                let roleSelect = `<select onchange="changeUserRole('${u.id}', this.value)" class="border p-1 rounded outline-none font-semibold ${u.role==='Admin'?'text-red-600':'text-gray-700'}">
+                    <option value="User" ${u.role==='User'?'selected':''}>User</option>
+                    <option value="Admin" ${u.role==='Admin'?'selected':''}>Admin</option>
+                </select>`;
+                
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-semibold text-blue-800">${u.username}</td>
+                        <td class="p-3 text-gray-600">${u.email || '-'}</td>
+                        <td class="p-3">${roleSelect}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="deleteUserAccount('${u.id}')" class="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1 rounded transition text-xs font-bold"><i class="fas fa-trash"></i> ลบผู้ใช้</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function changeUserRole(id, newRole) {
+            Swal.fire({ title: 'กำลังอัพเดทสิทธิ์...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'updateUserRole', id: id, newRole: newRole }) });
+            if((await res.json()).status === 'success') {
+                Swal.fire({title: 'อัพเดทสำเร็จ', icon: 'success', timer: 1000, showConfirmButton: false});
+                renderUserTable(); // อัพเดทสีอักษร
+            } else {
+                Swal.fire('ผิดพลาด', 'อัพเดทไม่สำเร็จ', 'error');
+            }
+        }
+
+        async function deleteUserAccount(id) {
+            const conf = await Swal.fire({ title: 'ยืนยันการลบ User?', text: "หากลบแล้วจะไม่สามารถกู้คืนได้", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ใช่, ลบเลย' });
+            if(conf.isConfirmed) {
+                Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', id: id }) });
+                if((await res.json()).status === 'success') {
+                    Swal.fire('สำเร็จ', 'ลบผู้ใช้งานเรียบร้อยแล้ว', 'success');
+                    loadUsers(); // โหลดตารางใหม่
+                }
+            }
+        }
+        
     </script>
 </body>
 </html>
