@@ -15,12 +15,22 @@
         .bg-jvl { background-color: #1e3a8a; }
         .page-section { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Color Coding Criteria */
+        .score-green { background-color: #a7f3d0 !important; color: #065f46; font-weight: bold; } /* >= 80 */
+        .score-yellow { background-color: #fef08a !important; color: #854d0e; font-weight: bold; } /* 70-79.9 */
+        .score-orange { background-color: #fed7aa !important; color: #9a3412; font-weight: bold; } /* 60-69.9 */
+        .score-red { background-color: #fecaca !important; color: #991b1b; font-weight: bold; }   /* < 60 */
+        
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid #cbd5e1; }
     </style>
 </head>
 <body class="bg-slate-50">
 
-    <!-- ================== LOGIN OVERLAY ================== -->
+    <!-- LOGIN OVERLAY -->
     <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-jvl px-4">
+        <!-- [โค้ดส่วน Login Form เหมือนเดิม ไม่มีการตัดทอน] -->
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 transform transition-all relative">
             <div id="loginSection">
                 <div class="text-center mb-8">
@@ -60,7 +70,7 @@
         </div>
     </div>
 
-    <!-- ================== MAIN INTERFACE ================== -->
+    <!-- MAIN INTERFACE -->
     <div id="mainApp" class="hidden flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside id="sidebar" class="bg-jvl text-white w-64 flex-shrink-0 sidebar-transition flex flex-col">
@@ -94,8 +104,11 @@
                 
                 <!-- 1. Dashboard Page -->
                 <div id="dashboardPage" class="page-section">
-                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">Dashboard ภาพรวม</h2>
-                    <div class="bg-white p-6 rounded-xl shadow mb-6"><p class="text-gray-500">ส่วนแสดงผลกราฟและสถิติ (รอการพัฒนาตามข้อมูลจริง)</p></div>
+                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">Dashboard ภาพรวมผลประเมินวัฒนธรรมความปลอดภัย</h2>
+                    <!-- Grid 12 มิติ -->
+                    <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10">
+                        <!-- สร้างด้วย JavaScript -->
+                    </div>
                 </div>
 
                 <!-- 2. ตั้งค่าข้อคำถาม -->
@@ -105,7 +118,7 @@
                         <div class="flex items-center gap-2">
                             <label class="font-bold">เลือกปีงบประมาณ:</label>
                             <select id="configYear" class="border p-2 rounded shadow-sm outline-none" onchange="loadConfigData()">
-                                <option value="2567">2567</option><option value="2568">2568</option><option value="2569" selected>2569</option>
+                                <option value="2564">2564</option><option value="2565">2565</option><option value="2566">2566</option><option value="2567" selected>2567</option><option value="2568">2568</option><option value="2569">2569</option>
                             </select>
                         </div>
                     </div>
@@ -114,7 +127,6 @@
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-layer-group"></i> 1. จัดการมิติการประเมิน</h3>
                         <div class="flex flex-col md:flex-row gap-4 mb-4">
-                            <!-- ใช้บันทึกค่าเดิมกรณีต้องการแก้ไขลำดับมิติ -->
                             <input type="hidden" id="oldDimNo">
                             <input type="number" id="dimNo" placeholder="ลำดับมิติ (เช่น 1)" class="border p-2 rounded md:w-1/4 outline-none">
                             <input type="text" id="dimName" placeholder="ชื่อมิติการประเมิน" class="border p-2 rounded flex-grow outline-none">
@@ -123,10 +135,8 @@
                         </div>
                         <div class="overflow-x-auto border rounded">
                             <table class="w-full text-left text-sm" id="dimTable">
-                                <thead class="bg-slate-100 text-blue-900">
-                                    <tr><th class="p-3 w-20">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr>
-                                </thead>
-                                <tbody><!-- รันข้อมูลด้วย JS --></tbody>
+                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -135,11 +145,8 @@
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-list-ul"></i> 2. จัดการข้อย่อย</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                            <!-- ใช้บันทึกค่าเดิมกรณีต้องการแก้ไขรหัสข้อย่อย -->
                             <input type="hidden" id="oldQCode">
-                            <select id="qDimSelect" class="border p-2 rounded outline-none md:col-span-2">
-                                <option value="">-- เลือกลำดับและชื่อมิติ --</option>
-                            </select>
+                            <select id="qDimSelect" class="border p-2 rounded outline-none md:col-span-2"><option value="">-- เลือกลำดับและชื่อมิติ --</option></select>
                             <input type="text" id="qCode" placeholder="รหัสข้อย่อย (เช่น D1)" class="border p-2 rounded outline-none">
                         </div>
                         <div class="flex flex-col md:flex-row gap-4 mb-4">
@@ -151,27 +158,62 @@
                         </div>
                         <div class="overflow-x-auto border rounded">
                             <table class="w-full text-left text-sm" id="qTable">
-                                <thead class="bg-slate-100 text-blue-900">
-                                    <tr>
-                                        <th class="p-3 w-20">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody><!-- รันข้อมูลด้วย JS --></tbody>
+                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. Tracking Page -->
-                <div id="trackingPage" class="page-section hidden">
-                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">ระบบติดตามการตอบแบบประเมิน</h2>
-                    <div class="bg-white p-6 rounded-xl shadow"><p class="text-gray-500">ส่วนระบบอัพโหลดและวิเคราะห์ไฟล์ (รอพัฒนาเต็มรูปแบบ)</p></div>
-                </div>
-
-                <!-- 4. Save Result Page Placeholder -->
+                <!-- 3. Save Result Page (บันทึกผลลัพธ์) -->
                 <div id="saveResultPage" class="page-section hidden">
                     <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">บันทึกผลลัพธ์การประเมินประจำปี</h2>
-                    <div class="bg-white p-6 rounded-xl shadow"><p class="text-gray-500">ตารางกรอกผลคะแนน (รอพัฒนาเต็มรูปแบบ)</p></div>
+                    
+                    <!-- ฟอร์มกรอกคะแนน -->
+                    <div class="bg-white p-6 rounded-xl shadow mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">ปีงบประมาณ</label>
+                                <select id="resYear" class="w-full border p-2 rounded outline-none"><option value="2564">2564</option><option value="2565">2565</option><option value="2566">2566</option><option value="2567" selected>2567</option><option value="2568">2568</option><option value="2569">2569</option></select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">รหัสข้อย่อย (พิมพ์ค้นหาได้)</label>
+                                <select id="resCode" class="w-full border p-2 rounded outline-none"><option value="">-- รอโหลดข้อมูล --</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">คะแนน (0-100)</label>
+                                <div class="flex gap-2">
+                                    <input type="number" id="resScore" step="0.1" class="w-full border p-2 rounded outline-none" placeholder="เช่น 85.5">
+                                    <button onclick="submitResult()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"><i class="fas fa-save"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ตารางแสดงผล Color Coding -->
+                    <div class="bg-white rounded-xl shadow overflow-x-auto pb-6">
+                        <table class="w-full text-left text-sm" id="resultTable">
+                            <thead class="bg-blue-800 text-white sticky top-0">
+                                <tr>
+                                    <th class="p-3 w-1/4">มิติ</th>
+                                    <th class="p-3 w-1/3">ข้อย่อย</th>
+                                    <th class="p-3 text-center">2564</th>
+                                    <th class="p-3 text-center">2565</th>
+                                    <th class="p-3 text-center">2566</th>
+                                    <th class="p-3 text-center">2567</th>
+                                    <th class="p-3 text-center">2568</th>
+                                    <th class="p-3 text-center">2569</th>
+                                </tr>
+                            </thead>
+                            <tbody><!-- สร้างด้วย JS --></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. Tracking Page Placeholder -->
+                <div id="trackingPage" class="page-section hidden">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">ระบบติดตามการตอบแบบประเมิน</h2>
+                    <div class="bg-white p-6 rounded-xl shadow"><p class="text-gray-500">ส่วนระบบอัพโหลดและวิเคราะห์ไฟล์ (รอพัฒนาเต็มรูปแบบในเฟสถัดไป)</p></div>
                 </div>
 
             </section>
@@ -179,18 +221,18 @@
     </div>
 
     <script>
-        // *** นำ URL WEB APP ล่าสุดของคุณมาใส่ที่นี่ ***
         const API = "https://script.google.com/macros/s/AKfycbx_GAxtZMhekPRzuACeau5CaMmIXwsPKRLOIoYAvfwiWj6l3W6zLcE7z4KTxlHXlQuTDQ/exec";
+        const YEARS = [2564, 2565, 2566, 2567, 2568, 2569];
         
         let currentUser = null;
         let globalDimensions = [];
         let globalQuestions = [];
+        let globalResults = [];
+        let chartInstances = {}; // สำหรับเก็บกราฟไว้ Destroy ก่อนสร้างใหม่
 
         // ================== ระบบ UI / Login ==================
         function toggleAuthView(sectionId) {
-            ['loginSection', 'registerSection', 'forgotSection'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
+            ['loginSection', 'registerSection', 'forgotSection'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(sectionId).classList.remove('hidden');
         }
 
@@ -198,18 +240,14 @@
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
             if(!user || !pass) return Swal.fire('เตือน', 'กรุณากรอกข้อมูล', 'warning');
-
             Swal.fire({ title: 'กำลังเข้าระบบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
             try {
                 const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'login', username: user, password: pass }) });
                 const result = await res.json();
                 if(result.status === 'success') {
                     currentUser = result.user;
                     initApp();
-                } else {
-                    Swal.fire('ผิดพลาด', result.message, 'error');
-                }
+                } else { Swal.fire('ผิดพลาด', result.message, 'error'); }
             } catch (e) { Swal.fire('ผิดพลาด', 'ติดต่อ Server ไม่ได้', 'error'); }
         }
 
@@ -217,38 +255,33 @@
             const user = document.getElementById('reg_username').value;
             const pass = document.getElementById('reg_password').value;
             const email = document.getElementById('reg_email').value;
-            const pdpa = document.getElementById('pdpa').checked;
-
             if(!user || !pass || !email) return Swal.fire('เตือน', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-            if(!pdpa) return Swal.fire('เตือน', 'กรุณากดยอมรับ PDPA ก่อนดำเนินการ', 'warning');
+            if(!document.getElementById('pdpa').checked) return Swal.fire('เตือน', 'กรุณากดยอมรับ PDPA', 'warning');
 
-            Swal.fire({ title: 'กำลังสมัครสมาชิก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'กำลังสมัคร...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'register', username: user, password: pass, email: email }) });
             const result = await res.json();
-            if(result.status === 'success') {
-                Swal.fire('สำเร็จ', result.message, 'success').then(()=> toggleAuthView('loginSection'));
-            } else { Swal.fire('ผิดพลาด', result.message, 'error'); }
+            if(result.status === 'success') { Swal.fire('สำเร็จ', result.message, 'success').then(()=> toggleAuthView('loginSection')); } 
+            else { Swal.fire('ผิดพลาด', result.message, 'error'); }
         }
 
         async function doForgotPassword() {
             const email = document.getElementById('forgot_email').value;
             if(!email) return Swal.fire('เตือน', 'กรุณาระบุ Email', 'warning');
-            Swal.fire({ title: 'กำลังส่งข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'กำลังส่ง...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'forgotPassword', email: email }) });
             const result = await res.json();
             Swal.fire(result.status === 'success' ? 'สำเร็จ' : 'ผิดพลาด', result.message, result.status);
         }
 
-        function guestLogin() {
-            currentUser = { username: 'Guest', role: 'Guest' };
-            initApp();
-        }
+        function guestLogin() { currentUser = { username: 'Guest', role: 'Guest' }; initApp(); }
 
         function initApp() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
             document.getElementById('userProfile').innerHTML = `<i class="fas fa-user-circle mr-2"></i>ผู้ใช้: ${currentUser.username} <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded ml-2">${currentUser.role}</span>`;
             if(currentUser.role === 'Admin') document.getElementById('adminMenu').classList.remove('hidden');
+            switchPage('dashboard');
             Swal.close();
         }
 
@@ -259,169 +292,221 @@
             side.classList.toggle('md:block');
         }
         function toggleAccordion(id) { document.getElementById(id).classList.toggle('hidden'); }
+        
         function switchPage(page) {
             document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
             document.getElementById(page + 'Page').classList.remove('hidden');
             if(page === 'configQuestion') loadConfigData();
+            if(page === 'saveResult') loadScoreData('result');
+            if(page === 'dashboard') loadScoreData('dashboard');
         }
 
-        // ================== ระบบตั้งค่าข้อคำถาม (แบบไม่ต้องพึ่ง ID) ==================
-        
+        // ================== ระบบ Config ข้อคำถาม ==================
         async function loadConfigData() {
             const year = document.getElementById('configYear').value;
-            document.getElementById('dimTable').querySelector('tbody').innerHTML = '<tr><td colspan="3" class="text-center p-4">กำลังโหลด...</td></tr>';
-            
             try {
-                // โหลดมิติ
                 let res1 = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getDimensions', year: year }) });
-                let result1 = await res1.json();
-                globalDimensions = result1.data || [];
-                
-                // โหลดข้อคำถาม
+                globalDimensions = (await res1.json()).data || [];
                 let res2 = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getQuestions', year: year }) });
-                let result2 = await res2.json();
-                globalQuestions = result2.data || [];
-
-                renderDimTable();
-                renderQTable();
-                updateDimDropdown();
-            } catch (e) {
-                console.error(e);
-                Swal.fire('ผิดพลาด', 'ดึงข้อมูลล้มเหลว', 'error');
-            }
+                globalQuestions = (await res2.json()).data || [];
+                
+                renderDimTable(); renderQTable();
+                const sel = document.getElementById('qDimSelect');
+                sel.innerHTML = '<option value="">-- เลือกลำดับและชื่อมิติ --</option>';
+                globalDimensions.forEach(dim => sel.innerHTML += `<option value="${dim.no}">${dim.no}. ${dim.name}</option>`);
+            } catch (e) { Swal.fire('ผิดพลาด', 'ดึงข้อมูลล้มเหลว', 'error'); }
         }
 
-        // --- มิติ ---
         function renderDimTable() {
-            const tbody = document.getElementById('dimTable').querySelector('tbody');
-            tbody.innerHTML = '';
-            if(globalDimensions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-gray-500">ยังไม่มีข้อมูลมิติในปีนี้</td></tr>';
-                return;
-            }
+            const tbody = document.getElementById('dimTable').querySelector('tbody'); tbody.innerHTML = '';
             globalDimensions.forEach(dim => {
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 font-bold text-center">${dim.no}</td>
-                        <td class="p-3">${dim.name}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="editDim(${dim.no}, '${dim.name}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
-                            <button onclick="delData('Dimension', ${dim.no})" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr class="border-b"><td class="p-3 text-center">${dim.no}</td><td class="p-3">${dim.name}</td><td class="p-3 text-center"><button onclick="editDim(${dim.no}, '${dim.name}')" class="text-yellow-600 mx-1"><i class="fas fa-edit"></i></button><button onclick="delData('Dimension', ${dim.no})" class="text-red-600 mx-1"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         }
-        function updateDimDropdown() {
-            const select = document.getElementById('qDimSelect');
-            select.innerHTML = '<option value="">-- เลือกลำดับและชื่อมิติ --</option>';
-            // ใช้ dim.no เป็น Value ใน Select
-            globalDimensions.forEach(dim => {
-                select.innerHTML += `<option value="${dim.no}">${dim.no}. ${dim.name}</option>`;
-            });
-        }
-        function clearDimForm() {
-            document.getElementById('oldDimNo').value = '';
-            document.getElementById('dimNo').value = '';
-            document.getElementById('dimName').value = '';
-        }
-        function editDim(no, name) {
-            document.getElementById('oldDimNo').value = no;
-            document.getElementById('dimNo').value = no;
-            document.getElementById('dimName').value = name;
-        }
+        function clearDimForm() { document.getElementById('oldDimNo').value = ''; document.getElementById('dimNo').value = ''; document.getElementById('dimName').value = ''; }
+        function editDim(no, name) { document.getElementById('oldDimNo').value = no; document.getElementById('dimNo').value = no; document.getElementById('dimName').value = name; }
+        
         async function saveDimension() {
-            const data = {
-                year: document.getElementById('configYear').value,
-                oldNo: document.getElementById('oldDimNo').value,
-                no: document.getElementById('dimNo').value,
-                name: document.getElementById('dimName').value
-            };
-            if(!data.no || !data.name) return Swal.fire('เตือน', 'กรุณาระบุลำดับและชื่อมิติให้ครบ', 'warning');
-            
+            const data = { year: document.getElementById('configYear').value, oldNo: document.getElementById('oldDimNo').value, no: document.getElementById('dimNo').value, name: document.getElementById('dimName').value };
+            if(!data.no || !data.name) return Swal.fire('เตือน', 'กรุณาระบุข้อมูล', 'warning');
             Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveDimension', data: data }) });
-            let result = await res.json();
-            if(result.status === 'success') {
-                Swal.fire('สำเร็จ', result.message, 'success');
-                clearDimForm();
-                loadConfigData(); // รีโหลดข้อมูลตาราง
-            }
+            if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', '', 'success'); clearDimForm(); loadConfigData(); }
         }
 
-        // --- ข้อย่อย ---
         function renderQTable() {
-            const tbody = document.getElementById('qTable').querySelector('tbody');
-            tbody.innerHTML = '';
-            if(globalQuestions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-500">ยังไม่มีข้อมูลข้อย่อยในปีนี้</td></tr>';
-                return;
-            }
-            
-            // เรียงลำดับตามมิติ และรหัส
-            let displayQ = [...globalQuestions].sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
-
-            displayQ.forEach(q => {
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 text-center font-bold text-blue-800">${q.dimNo}</td>
-                        <td class="p-3 font-semibold text-gray-700">${q.code}</td>
-                        <td class="p-3 text-sm">${q.text}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="editQuestion(${q.dimNo}, '${q.code}', '${q.text.replace(/'/g, "\\'")}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
-                            <button onclick="delData('Question', '${q.code}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
+            const tbody = document.getElementById('qTable').querySelector('tbody'); tbody.innerHTML = '';
+            let sortedQ = [...globalQuestions].sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
+            sortedQ.forEach(q => {
+                tbody.innerHTML += `<tr class="border-b"><td class="p-3 text-center font-bold text-blue-800">${q.dimNo}</td><td class="p-3 font-semibold">${q.code}</td><td class="p-3 text-sm">${q.text}</td><td class="p-3 text-center"><button onclick="editQuestion(${q.dimNo}, '${q.code}', '${q.text.replace(/'/g, "\\'")}')" class="text-yellow-600 mx-1"><i class="fas fa-edit"></i></button><button onclick="delData('Question', '${q.code}')" class="text-red-600 mx-1"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         }
-        function clearQForm() {
-            document.getElementById('oldQCode').value = '';
-            document.getElementById('qDimSelect').value = '';
-            document.getElementById('qCode').value = '';
-            document.getElementById('qText').value = '';
-        }
-        function editQuestion(dimNo, code, text) {
-            document.getElementById('oldQCode').value = code;
-            document.getElementById('qDimSelect').value = dimNo;
-            document.getElementById('qCode').value = code;
-            document.getElementById('qText').value = text;
-        }
+        function clearQForm() { document.getElementById('oldQCode').value = ''; document.getElementById('qDimSelect').value = ''; document.getElementById('qCode').value = ''; document.getElementById('qText').value = ''; }
+        function editQuestion(dimNo, code, text) { document.getElementById('oldQCode').value = code; document.getElementById('qDimSelect').value = dimNo; document.getElementById('qCode').value = code; document.getElementById('qText').value = text; }
+        
         async function saveQuestion() {
-            const data = {
-                year: document.getElementById('configYear').value,
-                oldCode: document.getElementById('oldQCode').value,
-                dimNo: document.getElementById('qDimSelect').value,
-                code: document.getElementById('qCode').value,
-                text: document.getElementById('qText').value
-            };
-            if(!data.dimNo || !data.code || !data.text) return Swal.fire('เตือน', 'กรุณาระบุข้อมูลให้ครบถ้วน', 'warning');
-            
+            const data = { year: document.getElementById('configYear').value, oldCode: document.getElementById('oldQCode').value, dimNo: document.getElementById('qDimSelect').value, code: document.getElementById('qCode').value, text: document.getElementById('qText').value };
+            if(!data.dimNo || !data.code || !data.text) return Swal.fire('เตือน', 'กรุณาระบุข้อมูลให้ครบ', 'warning');
             Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveQuestion', data: data }) });
-            let result = await res.json();
-            if(result.status === 'success') {
-                Swal.fire('สำเร็จ', result.message, 'success');
-                clearQForm();
-                loadConfigData();
+            if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', '', 'success'); clearQForm(); loadConfigData(); }
+        }
+
+        async function delData(type, key) {
+            const conf = await Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33' });
+            if(conf.isConfirmed) {
+                Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                let action = type === 'Dimension' ? 'deleteDimension' : 'deleteQuestion';
+                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: action, year: document.getElementById('configYear').value, key: key }) });
+                if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', 'ลบแล้ว', 'success'); loadConfigData(); }
             }
         }
 
-        // --- ลบข้อมูลกลาง ---
-        async function delData(type, key) {
-            const conf = await Swal.fire({ title: 'ยืนยันการลบ?', text: "หากลบแล้วจะไม่สามารถกู้คืนได้", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ใช่, ลบเลย' });
-            if(conf.isConfirmed) {
-                Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                const year = document.getElementById('configYear').value;
-                let action = type === 'Dimension' ? 'deleteDimension' : 'deleteQuestion';
-                
-                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: action, year: year, key: key }) });
-                let result = await res.json();
-                if(result.status === 'success') {
-                    Swal.fire('สำเร็จ', 'ลบข้อมูลแล้ว', 'success');
-                    loadConfigData();
-                }
+        // ================== ระบบแสดงผลคะแนน (ตาราง 6 ปี & กราฟ Dashboard) ==================
+        function getScoreColorClass(score) {
+            if(score === null || score === '' || isNaN(score)) return '';
+            if(score >= 80) return 'score-green';
+            if(score >= 70) return 'score-yellow';
+            if(score >= 60) return 'score-orange';
+            return 'score-red';
+        }
+
+        async function loadScoreData(mode) {
+            Swal.fire({ title: 'กำลังดึงข้อมูลฐานคะแนน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getScoreData' }) });
+                let data = await res.json();
+                globalDimensions = data.dims;
+                globalQuestions = data.questions;
+                globalResults = data.results;
+                Swal.close();
+
+                if(mode === 'result') renderResultTableAndDropdown();
+                if(mode === 'dashboard') renderDashboardCharts();
+            } catch (e) { Swal.fire('ผิดพลาด', 'ดึงข้อมูลไม่สำเร็จ', 'error'); }
+        }
+
+        // 1. Render ตารางแบบรวมปี
+        function renderResultTableAndDropdown() {
+            // อัพเดท Dropdown ข้อคำถาม
+            const sel = document.getElementById('resCode');
+            sel.innerHTML = '<option value="">-- เลือกข้อคำถาม --</option>';
+            let sortedQ = [...globalQuestions].sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
+            sortedQ.forEach(q => sel.innerHTML += `<option value="${q.code}">[${q.code}] ${q.text.substring(0,60)}...</option>`);
+
+            // อัพเดทตาราง Color Coding
+            const tbody = document.getElementById('resultTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            globalDimensions.forEach(dim => {
+                let qs = sortedQ.filter(q => q.dimNo === dim.no);
+                if(qs.length === 0) return;
+
+                qs.forEach((q, index) => {
+                    let tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-slate-50";
+                    
+                    // Column มิติ (Merge Row)
+                    if(index === 0) {
+                        tr.innerHTML += `<td class="p-3 bg-white font-semibold text-blue-900 align-top" rowspan="${qs.length}">${dim.no}. ${dim.name}</td>`;
+                    }
+                    // Column ข้อย่อย
+                    tr.innerHTML += `<td class="p-3 bg-white"><span class="font-bold text-gray-700">${q.code}</span>: ${q.text}</td>`;
+                    
+                    // Column คะแนนแต่ละปี
+                    YEARS.forEach(y => {
+                        let r = globalResults.find(res => res.year == y && res.code == q.code);
+                        let scoreText = r ? r.score : '-';
+                        let colorClass = r ? getScoreColorClass(r.score) : 'bg-gray-50 text-gray-400';
+                        tr.innerHTML += `<td class="p-3 text-center ${colorClass}">${scoreText}</td>`;
+                    });
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        async function submitResult() {
+            const year = document.getElementById('resYear').value;
+            const code = document.getElementById('resCode').value;
+            const score = document.getElementById('resScore').value;
+            
+            if(!code || !score) return Swal.fire('เตือน', 'กรุณาเลือกข้อคำถามและระบุคะแนน', 'warning');
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            const reqData = { year: year, code: code, score: parseFloat(score) };
+            let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveResult', data: reqData }) });
+            if((await res.json()).status === 'success') {
+                Swal.fire('สำเร็จ', '', 'success');
+                document.getElementById('resScore').value = '';
+                loadScoreData('result'); // โหลดใหม่เพื่อวาดตาราง
             }
+        }
+
+        // 2. Render Dashboard Grid 12 มิติ
+        function renderDashboardCharts() {
+            const grid = document.getElementById('dashboardGrid');
+            grid.innerHTML = '';
+            
+            // คำนวณค่าเฉลี่ยคะแนนภาพรวมของแต่ละมิติในแต่ละปี
+            let dimAverages = {};
+            globalDimensions.forEach(d => {
+                dimAverages[d.no] = { name: d.name, data: [] };
+                YEARS.forEach(y => {
+                    // หาคะแนนของทุกข้อย่อยในมิตินี้ ปีนี้
+                    let qs = globalQuestions.filter(q => q.dimNo === d.no).map(q => q.code);
+                    let scores = globalResults.filter(r => r.year == y && qs.includes(r.code)).map(r => r.score);
+                    
+                    if(scores.length > 0) {
+                        let avg = scores.reduce((a,b) => a+b, 0) / scores.length;
+                        dimAverages[d.no].data.push(avg.toFixed(1));
+                    } else {
+                        dimAverages[d.no].data.push(null);
+                    }
+                });
+            });
+
+            // สร้าง Card 12 ใบ
+            globalDimensions.forEach(d => {
+                let card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl shadow border-t-4 border-blue-600";
+                card.innerHTML = `
+                    <h3 class="text-sm font-bold text-blue-900 mb-2 truncate" title="${d.name}">มิติที่ ${d.no}: ${d.name}</h3>
+                    <div class="h-40 relative w-full"><canvas id="chart_dim_${d.no}"></canvas></div>
+                `;
+                grid.appendChild(card);
+
+                // ทำลายกราฟเก่าถ้ามี เพื่อป้องกัน Glitch
+                if(chartInstances[d.no]) chartInstances[d.no].destroy();
+
+                const ctx = document.getElementById(`chart_dim_${d.no}`).getContext('2d');
+                chartInstances[d.no] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: YEARS.map(String),
+                        datasets: [{
+                            label: 'คะแนนเฉลี่ยมิติ',
+                            data: dimAverages[d.no].data,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: function(context) {
+                                let val = context.raw;
+                                if(!val) return '#fff';
+                                if(val >= 80) return '#10b981'; // Green
+                                if(val >= 70) return '#eab308'; // Yellow
+                                if(val >= 60) return '#f97316'; // Orange
+                                return '#ef4444'; // Red
+                            },
+                            pointRadius: 5, fill: true, tension: 0.3, spanGaps: true
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 } } }
+                    }
+                });
+            });
         }
     </script>
 </body>
