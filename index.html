@@ -13,34 +13,56 @@
         body { font-family: 'Sarabun', sans-serif; overflow-x: hidden; }
         .sidebar-transition { transition: all 0.3s; }
         .bg-jvl { background-color: #1e3a8a; }
-        .criteria-red { background-color: #fee2e2; color: #dc2626; border-left: 4px solid #dc2626; }
-        .criteria-orange { background-color: #ffedd5; color: #ea580c; border-left: 4px solid #ea580c; }
-        .criteria-yellow { background-color: #fef9c3; color: #ca8a04; border-left: 4px solid #ca8a04; }
-        .criteria-green { background-color: #dcfce7; color: #16a34a; border-left: 4px solid #16a34a; }
+        .page-section { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="bg-slate-50">
 
+    <!-- ================== LOGIN OVERLAY ================== -->
     <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-jvl px-4">
-        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 transform transition-all">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-blue-900">JVL-HSCS</h1>
-                <p class="text-gray-500 mt-2">รพ.จิตเวชเลยราชนครินทร์</p>
-            </div>
-            <div id="authForm">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 transform transition-all relative">
+            <div id="loginSection">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-blue-900">JVL-HSCS</h1>
+                    <p class="text-gray-500 mt-2">โรงพยาบาลจิตเวชเลยราชนครินทร์</p>
+                </div>
                 <input type="text" id="username" placeholder="Username" class="w-full mb-4 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.key==='Enter') doLogin()">
                 <input type="password" id="password" placeholder="Password" class="w-full mb-6 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.key==='Enter') doLogin()">
                 <button onclick="doLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-lg shadow-lg transition">เข้าสู่ระบบ</button>
                 <div class="flex justify-between mt-6 text-sm text-blue-600">
-                    <span class="cursor-pointer hover:underline" onclick="showRegister()">สมัครสมาชิก</span>
-                    <span class="cursor-pointer hover:underline" onclick="showForgot()">ลืมรหัสผ่าน?</span>
+                    <span class="cursor-pointer hover:underline" onclick="toggleAuthView('registerSection')">สมัครสมาชิก</span>
+                    <span class="cursor-pointer hover:underline" onclick="toggleAuthView('forgotSection')">ลืมรหัสผ่าน?</span>
                 </div>
                 <button onclick="guestLogin()" class="w-full mt-6 py-2 border-2 border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition">เข้าชมแบบ Guest</button>
+            </div>
+
+            <div id="registerSection" class="hidden">
+                <div class="text-center mb-6"><h2 class="text-2xl font-bold text-blue-900">สมัครสมาชิก</h2></div>
+                <input type="text" id="reg_username" placeholder="ตั้ง Username" class="w-full mb-4 p-3 border rounded-lg outline-none">
+                <input type="password" id="reg_password" placeholder="ตั้ง Password" class="w-full mb-4 p-3 border rounded-lg outline-none">
+                <input type="email" id="reg_email" placeholder="Email (สำหรับกู้รหัส)" class="w-full mb-4 p-3 border rounded-lg outline-none">
+                <div class="mb-4 flex items-center">
+                    <input type="checkbox" id="pdpa" class="mr-2 h-4 w-4 text-blue-600">
+                    <label for="pdpa" class="text-sm text-gray-600">ข้าพเจ้ายินยอมให้ประมวลผลข้อมูลตาม <a href="#" class="text-blue-600 underline">PDPA</a></label>
+                </div>
+                <button onclick="doRegister()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg transition">ยืนยันสมัครสมาชิก</button>
+                <button onclick="toggleAuthView('loginSection')" class="w-full mt-4 text-gray-500 hover:underline">กลับไปหน้าเข้าสู่ระบบ</button>
+            </div>
+
+            <div id="forgotSection" class="hidden">
+                <div class="text-center mb-6"><h2 class="text-2xl font-bold text-blue-900">ลืมรหัสผ่าน</h2></div>
+                <p class="text-sm text-gray-600 mb-4">ระบบจะทำการส่งรหัสผ่านใหม่ไปยัง Email ที่คุณใช้สมัคร</p>
+                <input type="email" id="forgot_email" placeholder="ระบุ Email" class="w-full mb-6 p-3 border rounded-lg outline-none">
+                <button onclick="doForgotPassword()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-lg transition">ส่งรหัสผ่านไปที่ Email</button>
+                <button onclick="toggleAuthView('loginSection')" class="w-full mt-4 text-gray-500 hover:underline">กลับไปหน้าเข้าสู่ระบบ</button>
             </div>
         </div>
     </div>
 
+    <!-- ================== MAIN INTERFACE ================== -->
     <div id="mainApp" class="hidden flex h-screen overflow-hidden">
+        <!-- Sidebar -->
         <aside id="sidebar" class="bg-jvl text-white w-64 flex-shrink-0 sidebar-transition flex flex-col">
             <div class="p-6 text-xl font-bold border-b border-blue-800">Menu</div>
             <nav class="flex-grow p-4 space-y-2 overflow-y-auto text-sm">
@@ -52,7 +74,7 @@
                     </div>
                     <div id="hscsSub" class="hidden pl-8 space-y-2 mt-2">
                         <div class="p-2 hover:text-blue-300 cursor-pointer" onclick="switchPage('saveResult')">บันทึกผลการประเมิน</div>
-                        <div class="p-2 hover:text-blue-300 cursor-pointer">ตั้งค่าข้อคำถาม</div>
+                        <div class="p-2 hover:text-blue-300 cursor-pointer" onclick="switchPage('configQuestion')">ตั้งค่าข้อคำถาม</div>
                     </div>
                 </div>
                 <div class="p-3 hover:bg-blue-700 rounded cursor-pointer" onclick="switchPage('tracking')"><i class="fas fa-users-cog mr-3"></i> ติดตามการประเมิน</div>
@@ -61,50 +83,114 @@
             </nav>
         </aside>
 
+        <!-- Content Area -->
         <main class="flex-grow flex flex-col">
             <header class="bg-white shadow p-4 flex items-center justify-between">
                 <button onclick="toggleSidebar()" class="text-blue-900 text-xl"><i class="fas fa-bars"></i></button>
                 <div id="userProfile" class="text-sm font-semibold text-blue-900"></div>
             </header>
             
-            <section id="contentBody" class="p-6 overflow-y-auto h-full">
+            <section id="contentBody" class="p-6 overflow-y-auto h-full bg-slate-100">
+                
+                <!-- 1. Dashboard Page -->
                 <div id="dashboardPage" class="page-section">
-                    <h2 class="text-2xl font-bold mb-6 text-blue-900">Dashboard ประมวลผลภาพรวม</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow"><canvas id="runChart"></canvas></div>
-                        <div class="bg-white p-6 rounded-xl shadow">
-                            <h3 class="font-bold mb-4">สรุปสถิติตามมิติปี 2567</h3>
-                            <div id="zGrid" class="grid grid-cols-2 gap-4">
-                                </div>
+                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">Dashboard ภาพรวม</h2>
+                    <div class="bg-white p-6 rounded-xl shadow mb-6"><p class="text-gray-500">ส่วนแสดงผลกราฟและสถิติ (รอการพัฒนาตามข้อมูลจริง)</p></div>
+                </div>
+
+                <!-- 2. ตั้งค่าข้อคำถาม (เพิ่มใหม่ตามคำขอ) -->
+                <div id="configQuestionPage" class="page-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">ตั้งค่าข้อคำถามการประเมิน</h2>
+                        <div class="flex items-center gap-2">
+                            <label class="font-bold">เลือกปีงบประมาณ:</label>
+                            <select id="configYear" class="border p-2 rounded shadow-sm outline-none" onchange="loadConfigData()">
+                                <option value="2567">2567</option><option value="2568">2568</option><option value="2569" selected>2569</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 2.1 จัดการมิติ -->
+                    <div class="bg-white p-6 rounded-xl shadow mb-6">
+                        <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-layer-group"></i> 1. จัดการมิติการประเมิน</h3>
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <input type="hidden" id="dimId">
+                            <input type="number" id="dimNo" placeholder="ลำดับมิติ (เช่น 1)" class="border p-2 rounded md:w-1/4 outline-none">
+                            <input type="text" id="dimName" placeholder="ชื่อมิติการประเมิน" class="border p-2 rounded flex-grow outline-none">
+                            <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"><i class="fas fa-save"></i> บันทึกมิติ</button>
+                            <button onclick="clearDimForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow">เคลียร์</button>
+                        </div>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="dimTable">
+                                <thead class="bg-slate-100 text-blue-900">
+                                    <tr><th class="p-3 w-20">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr>
+                                </thead>
+                                <tbody><!-- รันข้อมูลด้วย JS --></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 2.2 จัดการข้อย่อย -->
+                    <div class="bg-white p-6 rounded-xl shadow mb-6">
+                        <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-list-ul"></i> 2. จัดการข้อย่อย</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <input type="hidden" id="qId">
+                            <select id="qDimSelect" class="border p-2 rounded outline-none md:col-span-2">
+                                <option value="">-- เลือกลำดับและชื่อมิติ --</option>
+                            </select>
+                            <input type="text" id="qCode" placeholder="รหัสข้อย่อย (เช่น D1)" class="border p-2 rounded outline-none">
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <textarea id="qText" placeholder="รายการข้อย่อย (คำถามประเมิน)" class="border p-2 rounded flex-grow h-20 outline-none"></textarea>
+                            <div class="flex flex-col gap-2">
+                                <button onclick="saveQuestion()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow h-full"><i class="fas fa-save"></i> บันทึกข้อย่อย</button>
+                                <button onclick="clearQForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow">เคลียร์</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="qTable">
+                                <thead class="bg-slate-100 text-blue-900">
+                                    <tr>
+                                        <th class="p-3 w-20">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody><!-- รันข้อมูลด้วย JS --></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
+                <!-- 3. Tracking Page -->
                 <div id="trackingPage" class="page-section hidden">
-                    <h2 class="text-2xl font-bold mb-6">ระบบติดตามการตอบแบบประเมิน</h2>
-                    <div class="bg-white p-6 rounded-xl shadow mb-6">
-                        <div class="flex gap-4">
-                            <input type="file" id="importFile" class="border p-2 rounded">
-                            <button onclick="processTracking()" class="bg-green-600 text-white px-6 py-2 rounded">วิเคราะห์ข้อมูล</button>
-                            <button onclick="exportExcel()" class="bg-blue-600 text-white px-6 py-2 rounded">Export รายงาน</button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto bg-white rounded shadow">
-                        <table class="w-full text-left text-sm" id="trackingTable">
-                            <thead class="bg-slate-100">
-                                <tr><th class="p-3">รหัสบุคลากร</th><th class="p-3">พื้นที่</th><th class="p-3">กลุ่ม</th><th class="p-3">สถานะ</th></tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">ระบบติดตามการตอบแบบประเมิน</h2>
+                    <div class="bg-white p-6 rounded-xl shadow"><p class="text-gray-500">ส่วนระบบอัพโหลดและวิเคราะห์ไฟล์ (รอพัฒนาเต็มรูปแบบ)</p></div>
                 </div>
+
+                <!-- 4. Save Result Page Placeholder -->
+                <div id="saveResultPage" class="page-section hidden">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">บันทึกผลลัพธ์การประเมินประจำปี</h2>
+                    <div class="bg-white p-6 rounded-xl shadow"><p class="text-gray-500">ตารางกรอกผลคะแนน (รอพัฒนาเต็มรูปแบบ)</p></div>
+                </div>
+
             </section>
         </main>
     </div>
 
     <script>
+        // *** นำ URL WEB APP ล่าสุดของคุณมาใส่ที่นี่ ***
         const API = "https://script.google.com/macros/s/AKfycbx_GAxtZMhekPRzuACeau5CaMmIXwsPKRLOIoYAvfwiWj6l3W6zLcE7z4KTxlHXlQuTDQ/exec";
+        
         let currentUser = null;
+        let globalDimensions = [];
+        let globalQuestions = [];
+
+        // ================== ระบบ UI / Login ==================
+        function toggleAuthView(sectionId) {
+            ['loginSection', 'registerSection', 'forgotSection'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
 
         async function doLogin() {
             const user = document.getElementById('username').value;
@@ -125,6 +211,32 @@
             } catch (e) { Swal.fire('ผิดพลาด', 'ติดต่อ Server ไม่ได้', 'error'); }
         }
 
+        async function doRegister() {
+            const user = document.getElementById('reg_username').value;
+            const pass = document.getElementById('reg_password').value;
+            const email = document.getElementById('reg_email').value;
+            const pdpa = document.getElementById('pdpa').checked;
+
+            if(!user || !pass || !email) return Swal.fire('เตือน', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+            if(!pdpa) return Swal.fire('เตือน', 'กรุณากดยอมรับ PDPA ก่อนดำเนินการ', 'warning');
+
+            Swal.fire({ title: 'กำลังสมัครสมาชิก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'register', username: user, password: pass, email: email }) });
+            const result = await res.json();
+            if(result.status === 'success') {
+                Swal.fire('สำเร็จ', result.message, 'success').then(()=> toggleAuthView('loginSection'));
+            } else { Swal.fire('ผิดพลาด', result.message, 'error'); }
+        }
+
+        async function doForgotPassword() {
+            const email = document.getElementById('forgot_email').value;
+            if(!email) return Swal.fire('เตือน', 'กรุณาระบุ Email', 'warning');
+            Swal.fire({ title: 'กำลังส่งข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'forgotPassword', email: email }) });
+            const result = await res.json();
+            Swal.fire(result.status === 'success' ? 'สำเร็จ' : 'ผิดพลาด', result.message, result.status);
+        }
+
         function guestLogin() {
             currentUser = { username: 'Guest', role: 'Guest' };
             initApp();
@@ -133,61 +245,180 @@
         function initApp() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('userProfile').innerText = `ผู้ใช้: ${currentUser.username} (${currentUser.role})`;
-            
+            document.getElementById('userProfile').innerHTML = `<i class="fas fa-user-circle mr-2"></i>ผู้ใช้: ${currentUser.username} <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded ml-2">${currentUser.role}</span>`;
             if(currentUser.role === 'Admin') document.getElementById('adminMenu').classList.remove('hidden');
-            if(currentUser.role === 'Guest') {
-                // Disable save menus for guest
-            }
-            loadChart();
             Swal.close();
         }
 
         function toggleSidebar() {
             const side = document.getElementById('sidebar');
             side.classList.toggle('w-0');
-            side.classList.toggle('overflow-hidden');
+            side.classList.toggle('hidden');
+            side.classList.toggle('md:block');
         }
-
-        function toggleAccordion(id) {
-            document.getElementById(id).classList.toggle('hidden');
-        }
-
+        function toggleAccordion(id) { document.getElementById(id).classList.toggle('hidden'); }
         function switchPage(page) {
             document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
             document.getElementById(page + 'Page').classList.remove('hidden');
+            if(page === 'configQuestion') loadConfigData();
         }
 
-        function loadChart() {
-            const ctx = document.getElementById('runChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['2564', '2565', '2566', '2567'],
-                    datasets: [{ label: 'คะแนนภาพรวม', data: [65, 72, 70, 81], borderColor: '#1e3a8a', tension: 0.1 }]
-                }
-            });
-        }
-
-        // Tracking & Import Logic
-        async function processTracking() {
-            // โลจิกดึงไฟล์ CSV/Excel และส่งไป API เพื่อวิเคราะห์
-            Swal.fire('ระบบจำลอง', 'กรุณาเขียนฟังก์ชันอ่านไฟล์ CSV เพิ่มเติมเพื่อส่งข้อมูลไป processTracking ในสคริปต์', 'info');
-        }
+        // ================== ระบบตั้งค่าข้อคำถาม (มิติ & ข้อย่อย) ==================
         
-        async function showRegister() {
-            const { value: accept } = await Swal.fire({
-                title: 'PDPA Consent',
-                html: 'ยินยอมให้ระบบจัดเก็บข้อมูลบุคลากรเพื่อการประมวลผลทางสถิติของโรงพยาบาล...',
-                input: 'checkbox',
-                inputValue: 0,
-                inputPlaceholder: 'ฉันยอมรับเงื่อนไข',
-                confirmButtonText: 'ดำเนินการต่อ <i class="fa fa-arrow-right"></i>',
-                inputValidator: (result) => { if (!result) return 'คุณต้องกดยอมรับก่อนสมัคร' }
-            });
+        async function loadConfigData() {
+            const year = document.getElementById('configYear').value;
+            document.getElementById('dimTable').querySelector('tbody').innerHTML = '<tr><td colspan="3" class="text-center p-4">กำลังโหลด...</td></tr>';
+            
+            try {
+                // โหลดมิติ
+                let res1 = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getDimensions', year: year }) });
+                let result1 = await res1.json();
+                globalDimensions = result1.data || [];
+                
+                // โหลดข้อคำถาม
+                let res2 = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getQuestions', year: year }) });
+                let result2 = await res2.json();
+                globalQuestions = result2.data || [];
 
-            if (accept) {
-                // Show Registration Form Swal...
+                renderDimTable();
+                renderQTable();
+                updateDimDropdown();
+            } catch (e) {
+                console.error(e);
+                Swal.fire('ผิดพลาด', 'ดึงข้อมูลล้มเหลว', 'error');
+            }
+        }
+
+        // --- มิติ ---
+        function renderDimTable() {
+            const tbody = document.getElementById('dimTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            if(globalDimensions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-gray-500">ยังไม่มีข้อมูลมิติในปีนี้</td></tr>';
+                return;
+            }
+            globalDimensions.forEach(dim => {
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-bold text-center">${dim.no}</td>
+                        <td class="p-3">${dim.name}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="editDim('${dim.id}', ${dim.no}, '${dim.name}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="delData('Config_Dimensions', '${dim.id}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        function updateDimDropdown() {
+            const select = document.getElementById('qDimSelect');
+            select.innerHTML = '<option value="">-- เลือกลำดับและชื่อมิติ --</option>';
+            globalDimensions.forEach(dim => {
+                select.innerHTML += `<option value="${dim.id}">${dim.no}. ${dim.name}</option>`;
+            });
+        }
+        function clearDimForm() {
+            document.getElementById('dimId').value = '';
+            document.getElementById('dimNo').value = '';
+            document.getElementById('dimName').value = '';
+        }
+        function editDim(id, no, name) {
+            document.getElementById('dimId').value = id;
+            document.getElementById('dimNo').value = no;
+            document.getElementById('dimName').value = name;
+        }
+        async function saveDimension() {
+            const data = {
+                id: document.getElementById('dimId').value,
+                year: document.getElementById('configYear').value,
+                no: document.getElementById('dimNo').value,
+                name: document.getElementById('dimName').value
+            };
+            if(!data.no || !data.name) return Swal.fire('เตือน', 'กรุณาระบุลำดับและชื่อมิติให้ครบ', 'warning');
+            
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveDimension', data: data }) });
+            let result = await res.json();
+            if(result.status === 'success') {
+                Swal.fire('สำเร็จ', result.message, 'success');
+                clearDimForm();
+                loadConfigData(); // รีโหลดข้อมูลตาราง
+            }
+        }
+
+        // --- ข้อย่อย ---
+        function renderQTable() {
+            const tbody = document.getElementById('qTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            if(globalQuestions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-500">ยังไม่มีข้อมูลข้อย่อยในปีนี้</td></tr>';
+                return;
+            }
+            
+            // เรียงลำดับตามมิติ และรหัส
+            let displayQ = [...globalQuestions].map(q => {
+                let d = globalDimensions.find(dim => dim.id === q.dimId);
+                return { ...q, dimNo: d ? d.no : 999 }; // ถ้าไม่เจอมิติให้ไปอยู่ท้าย
+            }).sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
+
+            displayQ.forEach(q => {
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 text-center font-bold text-blue-800">${q.dimNo === 999 ? '-' : q.dimNo}</td>
+                        <td class="p-3 font-semibold text-gray-700">${q.code}</td>
+                        <td class="p-3 text-sm">${q.text}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="editQuestion('${q.id}', '${q.dimId}', '${q.code}', '${q.text.replace(/'/g, "\\'")}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="delData('Config_Questions', '${q.id}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        function clearQForm() {
+            document.getElementById('qId').value = '';
+            document.getElementById('qDimSelect').value = '';
+            document.getElementById('qCode').value = '';
+            document.getElementById('qText').value = '';
+        }
+        function editQuestion(id, dimId, code, text) {
+            document.getElementById('qId').value = id;
+            document.getElementById('qDimSelect').value = dimId;
+            document.getElementById('qCode').value = code;
+            document.getElementById('qText').value = text;
+        }
+        async function saveQuestion() {
+            const data = {
+                id: document.getElementById('qId').value,
+                year: document.getElementById('configYear').value,
+                dimId: document.getElementById('qDimSelect').value,
+                code: document.getElementById('qCode').value,
+                text: document.getElementById('qText').value
+            };
+            if(!data.dimId || !data.code || !data.text) return Swal.fire('เตือน', 'กรุณาระบุข้อมูลให้ครบถ้วน', 'warning');
+            
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveQuestion', data: data }) });
+            let result = await res.json();
+            if(result.status === 'success') {
+                Swal.fire('สำเร็จ', result.message, 'success');
+                clearQForm();
+                loadConfigData();
+            }
+        }
+
+        // --- ลบข้อมูลกลาง ---
+        async function delData(type, id) {
+            const conf = await Swal.fire({ title: 'ยืนยันการลบ?', text: "หากลบแล้วจะไม่สามารถกู้คืนได้", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ใช่, ลบเลย' });
+            if(conf.isConfirmed) {
+                Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                let action = type === 'Config_Dimensions' ? 'deleteDimension' : 'deleteQuestion';
+                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: action, id: id }) });
+                let result = await res.json();
+                if(result.status === 'success') {
+                    Swal.fire('สำเร็จ', 'ลบข้อมูลแล้ว', 'success');
+                    loadConfigData();
+                }
             }
         }
     </script>
