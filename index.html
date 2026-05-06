@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JVL-HSCS | ระบบบริหารจัดการวัฒนธรรมความปลอดภัย</title>
+    
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS สำหรับอ่านไฟล์ Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Sarabun', sans-serif; overflow-x: hidden; }
         .sidebar-transition { transition: all 0.3s; }
@@ -19,6 +20,7 @@
         .page-section { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
+        /* Color Coding (คะแนนประเมิน) */
         .score-green { background-color: #a7f3d0 !important; color: #065f46; font-weight: bold; }
         .score-yellow { background-color: #fef08a !important; color: #854d0e; font-weight: bold; }
         .score-orange { background-color: #fed7aa !important; color: #9a3412; font-weight: bold; }
@@ -27,17 +29,17 @@
         table { border-collapse: collapse; }
         th, td { border: 1px solid #cbd5e1; }
 
-        /* สไตล์สีหัวตารางสถิติตามแบบ */
-        .bg-exec { background-color: #fcd34d; } /* สีส้มพาสเทล ผู้บริหาร */
-        .bg-med { background-color: #bbf7d0; } /* สีเขียวพาสเทล สายวิชาชีพ */
-        .bg-sup-med { background-color: #bae6fd; } /* สีฟ้าพาสเทล สายสนับสนุนแพทย์ */
-        .bg-sup-gen { background-color: #e9d5ff; } /* สีม่วงพาสเทล สายสนับสนุนทั่วไป */
-        .bg-total { background-color: #e5e7eb; } /* สีเทาพาสเทล ทั้งหมด */
+        /* สไตล์สีตารางสถิติ (Tracking) */
+        .bg-exec { background-color: #fcd34d; } 
+        .bg-med { background-color: #bbf7d0; } 
+        .bg-sup-med { background-color: #bae6fd; } 
+        .bg-sup-gen { background-color: #e9d5ff; } 
+        .bg-total { background-color: #e5e7eb; } 
     </style>
 </head>
 <body class="bg-slate-50">
 
-    <!-- LOGIN OVERLAY -->
+    <!-- ================== LOGIN OVERLAY ================== -->
     <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-jvl px-4">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 transform transition-all relative">
             <div id="loginSection">
@@ -56,18 +58,24 @@
                 </div>
                 <button onclick="guestLogin()" class="w-full mt-6 py-2 border-2 border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition">เข้าชมแบบ Guest</button>
             </div>
-            <!-- สมัครสมาชิก / ลืมรหัสผ่าน (เหมือนเดิม) -->
+
+            <!-- Register / Forgot Password -->
             <div id="registerSection" class="hidden">
                 <div class="text-center mb-6"><h2 class="text-2xl font-bold text-blue-900">สมัครสมาชิก</h2></div>
                 <input type="text" id="reg_username" placeholder="ตั้ง Username" class="w-full mb-4 p-3 border rounded-lg outline-none">
                 <input type="password" id="reg_password" placeholder="ตั้ง Password" class="w-full mb-4 p-3 border rounded-lg outline-none">
                 <input type="email" id="reg_email" placeholder="Email (สำหรับกู้รหัส)" class="w-full mb-4 p-3 border rounded-lg outline-none">
-                <div class="mb-4 flex items-center"><input type="checkbox" id="pdpa" class="mr-2 h-4 w-4 text-blue-600"><label for="pdpa" class="text-sm text-gray-600">ข้าพเจ้ายินยอมให้ประมวลผลข้อมูลตาม PDPA</label></div>
+                <div class="mb-4 flex items-center">
+                    <input type="checkbox" id="pdpa" class="mr-2 h-4 w-4 text-blue-600">
+                    <label for="pdpa" class="text-sm text-gray-600">ข้าพเจ้ายินยอมให้ประมวลผลข้อมูลตาม <a href="#" class="text-blue-600 underline">PDPA</a></label>
+                </div>
                 <button onclick="doRegister()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg transition">ยืนยันสมัครสมาชิก</button>
                 <button onclick="toggleAuthView('loginSection')" class="w-full mt-4 text-gray-500 hover:underline">กลับไปหน้าเข้าสู่ระบบ</button>
             </div>
+
             <div id="forgotSection" class="hidden">
                 <div class="text-center mb-6"><h2 class="text-2xl font-bold text-blue-900">ลืมรหัสผ่าน</h2></div>
+                <p class="text-sm text-gray-600 mb-4">ระบบจะทำการส่งรหัสผ่านใหม่ไปยัง Email ที่คุณใช้สมัคร</p>
                 <input type="email" id="forgot_email" placeholder="ระบุ Email" class="w-full mb-6 p-3 border rounded-lg outline-none">
                 <button onclick="doForgotPassword()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-lg transition">ส่งรหัสผ่านไปที่ Email</button>
                 <button onclick="toggleAuthView('loginSection')" class="w-full mt-4 text-gray-500 hover:underline">กลับไปหน้าเข้าสู่ระบบ</button>
@@ -75,8 +83,9 @@
         </div>
     </div>
 
-    <!-- MAIN INTERFACE -->
+    <!-- ================== MAIN INTERFACE ================== -->
     <div id="mainApp" class="hidden flex h-screen overflow-hidden">
+        
         <!-- Sidebar -->
         <aside id="sidebar" class="bg-jvl text-white w-64 flex-shrink-0 sidebar-transition flex flex-col">
             <div class="p-5 text-xl font-bold border-b border-blue-800 flex items-center gap-3">
@@ -85,8 +94,12 @@
             </div>
 
             <nav class="flex-grow p-4 space-y-2 overflow-y-auto text-sm">
-                <div class="p-3 hover:bg-blue-700 rounded cursor-pointer transition" onclick="switchPage('dashboard')"><i class="fas fa-chart-line mr-3"></i> Dashboard</div>
+                <!-- Dashboard -->
+                <div class="p-3 hover:bg-blue-700 rounded cursor-pointer transition" onclick="switchPage('dashboard')">
+                    <i class="fas fa-chart-line mr-3"></i> Dashboard
+                </div>
                 
+                <!-- ผล HSCS รายปี -->
                 <div>
                     <div class="p-3 hover:bg-blue-700 rounded cursor-pointer flex justify-between items-center transition" onclick="toggleAccordion('hscsSub')">
                         <span><i class="fas fa-file-alt mr-3"></i> ผล HSCS รายปี</span><i class="fas fa-chevron-down text-xs"></i>
@@ -97,7 +110,7 @@
                     </div>
                 </div>
 
-                <!-- เพิ่มเมนูย่อย ติดตามการประเมิน -->
+                <!-- ติดตามการประเมิน -->
                 <div>
                     <div class="p-3 hover:bg-blue-700 rounded cursor-pointer flex justify-between items-center transition" onclick="toggleAccordion('trackSub')">
                         <span><i class="fas fa-users-cog mr-3"></i> ติดตามการประเมิน</span><i class="fas fa-chevron-down text-xs"></i>
@@ -123,30 +136,114 @@
             
             <section id="contentBody" class="p-6 overflow-y-auto h-full bg-slate-100">
                 
-                <!-- 1. Dashboard Page -->
+                <!-- ================== 1. Dashboard Page ================== -->
                 <div id="dashboardPage" class="page-section">
                     <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">Dashboard ภาพรวมผลประเมินวัฒนธรรมความปลอดภัย</h2>
-                    <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10"></div>
+                    <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10">
+                        <!-- สร้างด้วย JavaScript -->
+                    </div>
                 </div>
 
-                <!-- 2. ตั้งค่าข้อคำถาม -->
+                <!-- ================== 2. ตั้งค่าข้อคำถาม ================== -->
                 <div id="configQuestionPage" class="page-section hidden">
-                    <!-- โค้ดส่วนนี้เหมือนเดิม (ซ่อนไว้เพื่อความกระชับ แต่ต้องนำมาจากไฟล์เก่าที่คุณมี) -->
-                    <div class="bg-white p-6 rounded shadow mb-6 text-center text-gray-500">
-                        <p>ส่วนของ "ตั้งค่าข้อคำถามการประเมิน" (โค้ดดั้งเดิม)</p>
-                        <!-- กรุณานำโค้ด UI ของ Config Question จากไฟล์ก่อนหน้ามาใส่ตรงนี้ หากต้องการแสดง -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">ตั้งค่าข้อคำถามการประเมิน</h2>
+                        <div class="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                            <label class="font-bold text-gray-700">เลือกปีงบประมาณ:</label>
+                            <select id="configYear" class="border p-1 rounded outline-none font-semibold text-blue-900" onchange="loadConfigData()">
+                                <option value="2564">2564</option><option value="2565">2565</option><option value="2566">2566</option><option value="2567" selected>2567</option><option value="2568">2568</option><option value="2569">2569</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- จัดการมิติ -->
+                    <div class="bg-white p-6 rounded-xl shadow mb-6">
+                        <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-layer-group"></i> 1. จัดการมิติการประเมิน</h3>
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <input type="hidden" id="oldDimNo">
+                            <input type="number" id="dimNo" placeholder="ลำดับมิติ (เช่น 1)" class="border p-2 rounded md:w-1/4 outline-none">
+                            <input type="text" id="dimName" placeholder="ชื่อมิติการประเมิน" class="border p-2 rounded flex-grow outline-none">
+                            <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-save"></i> บันทึกมิติ</button>
+                            <button onclick="clearDimForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
+                        </div>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="dimTable">
+                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- จัดการข้อย่อย -->
+                    <div class="bg-white p-6 rounded-xl shadow mb-6">
+                        <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-list-ul"></i> 2. จัดการข้อย่อย</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <input type="hidden" id="oldQCode">
+                            <select id="qDimSelect" class="border p-2 rounded outline-none md:col-span-2"><option value="">-- เลือกลำดับและชื่อมิติ --</option></select>
+                            <input type="text" id="qCode" placeholder="รหัสข้อย่อย (เช่น D1)" class="border p-2 rounded outline-none">
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <textarea id="qText" placeholder="รายการข้อย่อย (คำถามประเมิน)" class="border p-2 rounded flex-grow h-20 outline-none"></textarea>
+                            <div class="flex flex-col gap-2">
+                                <button onclick="saveQuestion()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow h-full transition"><i class="fas fa-save"></i> บันทึกข้อย่อย</button>
+                                <button onclick="clearQForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="qTable">
+                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 3. Save Result Page -->
+                <!-- ================== 3. Save Result Page ================== -->
                 <div id="saveResultPage" class="page-section hidden">
-                     <!-- กรุณานำโค้ด UI ของ Save Result จากไฟล์ก่อนหน้ามาใส่ตรงนี้ หากต้องการแสดง -->
-                     <div class="bg-white p-6 rounded shadow mb-6 text-center text-gray-500">
-                        <p>ส่วนของ "บันทึกผลการประเมิน" (โค้ดดั้งเดิม)</p>
+                    <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">บันทึกผลลัพธ์การประเมินประจำปี</h2>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow mb-6 border-t-4 border-blue-600">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">ปีงบประมาณ</label>
+                                <select id="resYear" class="w-full border p-2 rounded outline-none"><option value="2564">2564</option><option value="2565">2565</option><option value="2566">2566</option><option value="2567" selected>2567</option><option value="2568">2568</option><option value="2569">2569</option></select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">รหัสข้อย่อย</label>
+                                <select id="resCode" class="w-full border p-2 rounded outline-none"><option value="">-- รอโหลดข้อมูล --</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">คะแนน (0-100)</label>
+                                <div class="flex gap-2">
+                                    <input type="number" id="resScore" step="0.1" class="w-full border p-2 rounded outline-none" placeholder="เช่น 85.5">
+                                    <button onclick="submitResult()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow transition"><i class="fas fa-save"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow overflow-hidden pb-4">
+                        <div class="overflow-x-auto max-h-[600px]">
+                            <table class="w-full text-left text-sm" id="resultTable">
+                                <thead class="bg-blue-900 text-white sticky top-0 z-10 shadow">
+                                    <tr>
+                                        <th class="p-3 w-1/4">มิติการประเมิน</th>
+                                        <th class="p-3 w-1/3">รายการข้อย่อย</th>
+                                        <th class="p-3 text-center w-16">2564</th>
+                                        <th class="p-3 text-center w-16">2565</th>
+                                        <th class="p-3 text-center w-16">2566</th>
+                                        <th class="p-3 text-center w-16">2567</th>
+                                        <th class="p-3 text-center w-16">2568</th>
+                                        <th class="p-3 text-center w-16">2569</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- ================== หน้า Tracking (ใหม่) ================== -->
+                <!-- ================== 4. Tracking Pages ================== -->
 
                 <!-- 4.1 Upload Master -->
                 <div id="uploadMasterPage" class="page-section hidden">
@@ -163,16 +260,13 @@
                             <button onclick="handleFileUpload('master')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-upload"></i> อัพโหลด</button>
                         </div>
                         
-                        <!-- แสดงสถานะอัพโหลด -->
                         <div id="masterStatusCard" class="mt-6 p-4 rounded-lg bg-gray-50 border hidden">
                             <div class="flex justify-between items-center">
                                 <div>
                                     <h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลบุคลากรในระบบแล้ว</h4>
                                     <p class="text-sm text-gray-600 mt-1" id="masterTimeText">อัพโหลดเมื่อ: -</p>
                                 </div>
-                                <div>
-                                    <button onclick="deleteUpload('master')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button>
-                                </div>
+                                <div><button onclick="deleteUpload('master')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button></div>
                             </div>
                         </div>
                     </div>
@@ -193,22 +287,19 @@
                             <button onclick="handleFileUpload('record')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-upload"></i> อัพโหลด (ทับของเดิม)</button>
                         </div>
                         
-                        <!-- แสดงสถานะอัพโหลด -->
                         <div id="recordStatusCard" class="mt-6 p-4 rounded-lg bg-gray-50 border hidden">
                             <div class="flex justify-between items-center">
                                 <div>
                                     <h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลการตอบแบบประเมินล่าสุดแล้ว</h4>
                                     <p class="text-sm text-gray-600 mt-1" id="recordTimeText">อัพโหลดเมื่อ: -</p>
                                 </div>
-                                <div>
-                                    <button onclick="deleteUpload('record')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button>
-                                </div>
+                                <div><button onclick="deleteUpload('record')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4.3 Summary -->
+                <!-- 4.3 Tracking Summary -->
                 <div id="trackingSummaryPage" class="page-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">สรุปผลการประเมิน</h2>
@@ -230,13 +321,9 @@
                                         <th colspan="4" class="p-3 bg-sup-gen border-b-0 text-gray-800">สายสนับสนุนทั่วไป</th>
                                         <th colspan="4" class="p-3 bg-total border-b-0 text-gray-800">ทั้งหมด</th>
                                     </tr>
-                                    <tr class="bg-slate-50 text-xs text-gray-600">
-                                        <!-- สร้างด้วย JS 5 ชุด -->
-                                    </tr>
+                                    <tr class="bg-slate-50 text-xs text-gray-600"></tr>
                                 </thead>
-                                <tbody>
-                                    <!-- สร้างด้วย JS -->
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -255,15 +342,9 @@
                         <div class="overflow-x-auto border rounded">
                             <table class="w-full text-left text-sm" id="detailTable">
                                 <thead class="bg-slate-100 text-blue-900">
-                                    <tr>
-                                        <th class="p-3">รหัสบุคลากร</th>
-                                        <th class="p-3">พื้นที่ (ฐานข้อมูล)</th>
-                                        <th class="p-3">กลุ่ม (ฐานข้อมูล)</th>
-                                        <th class="p-3">กลุ่ม (ที่ตอบมา)</th>
-                                        <th class="p-3">สถานะ</th>
-                                    </tr>
+                                    <tr><th class="p-3">รหัสบุคลากร</th><th class="p-3">พื้นที่ (ฐานข้อมูล)</th><th class="p-3">กลุ่ม (ฐานข้อมูล)</th><th class="p-3">กลุ่ม (ที่ตอบมา)</th><th class="p-3">สถานะ</th></tr>
                                 </thead>
-                                <tbody><!-- รันด้วย JS --></tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -273,13 +354,20 @@
         </main>
     </div>
 
+    <!-- ================== JAVASCRIPT ================== -->
     <script>
+        // เปลี่ยน URL นี้ให้เป็น URL Web App ของคุณ
         const API = "https://script.google.com/macros/s/AKfycbx_GAxtZMhekPRzuACeau5CaMmIXwsPKRLOIoYAvfwiWj6l3W6zLcE7z4KTxlHXlQuTDQ/exec";
+        const YEARS = [2564, 2565, 2566, 2567, 2568, 2569];
         
         let currentUser = null;
-        let trackingCache = { master: null, record: null }; // เก็บข้อมูลสำหรับหน้า Summary
+        let globalDimensions = [];
+        let globalQuestions = [];
+        let globalResults = [];
+        let chartInstances = {};
+        let detailedReportData = []; // สำหรับหน้า Tracking Summary
 
-        // ================== ระบบ UI / Login ==================
+        // ------------------ ระบบ UI & Login ------------------
         function toggleAuthView(sectionId) {
             ['loginSection', 'registerSection', 'forgotSection'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(sectionId).classList.remove('hidden');
@@ -296,6 +384,29 @@
                 if(result.status === 'success') { currentUser = result.user; initApp(); } 
                 else { Swal.fire('ผิดพลาด', result.message, 'error'); }
             } catch (e) { Swal.fire('ผิดพลาด', 'ติดต่อ Server ไม่ได้', 'error'); }
+        }
+
+        async function doRegister() {
+            const user = document.getElementById('reg_username').value;
+            const pass = document.getElementById('reg_password').value;
+            const email = document.getElementById('reg_email').value;
+            if(!user || !pass || !email) return Swal.fire('เตือน', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+            if(!document.getElementById('pdpa').checked) return Swal.fire('เตือน', 'กรุณากดยอมรับ PDPA', 'warning');
+
+            Swal.fire({ title: 'กำลังสมัคร...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'register', username: user, password: pass, email: email }) });
+            const result = await res.json();
+            if(result.status === 'success') { Swal.fire('สำเร็จ', result.message, 'success').then(()=> toggleAuthView('loginSection')); } 
+            else { Swal.fire('ผิดพลาด', result.message, 'error'); }
+        }
+
+        async function doForgotPassword() {
+            const email = document.getElementById('forgot_email').value;
+            if(!email) return Swal.fire('เตือน', 'กรุณาระบุ Email', 'warning');
+            Swal.fire({ title: 'กำลังส่ง...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'forgotPassword', email: email }) });
+            const result = await res.json();
+            Swal.fire(result.status === 'success' ? 'สำเร็จ' : 'ผิดพลาด', result.message, result.status);
         }
 
         function guestLogin() { currentUser = { username: 'Guest', role: 'Guest' }; initApp(); }
@@ -319,17 +430,217 @@
             document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
             document.getElementById(page + 'Page').classList.remove('hidden');
             
+            if(page === 'configQuestion') loadConfigData();
+            if(page === 'saveResult') loadScoreData('result');
+            if(page === 'dashboard') loadScoreData('dashboard');
             if(page === 'uploadMaster') loadTrackingStatus('master');
             if(page === 'uploadRecord') loadTrackingStatus('record');
             if(page === 'trackingSummary') generateSummary();
         }
 
-        // ================== ระบบ อ่านและอัพโหลดไฟล์ (SheetJS) ==================
+        // ------------------ ระบบ Config ข้อคำถาม ------------------
+        async function loadConfigData() {
+            const year = document.getElementById('configYear').value;
+            document.getElementById('dimTable').querySelector('tbody').innerHTML = '<tr><td colspan="3" class="text-center p-4">กำลังโหลด...</td></tr>';
+            try {
+                let res1 = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getDimensions', year: year }) });
+                globalDimensions = (await res1.json()).data || [];
+                let res2 = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getQuestions', year: year }) });
+                globalQuestions = (await res2.json()).data || [];
+                
+                renderDimTable(); renderQTable();
+                const sel = document.getElementById('qDimSelect');
+                sel.innerHTML = '<option value="">-- เลือกลำดับและชื่อมิติ --</option>';
+                globalDimensions.forEach(dim => sel.innerHTML += `<option value="${dim.no}">${dim.no}. ${dim.name}</option>`);
+            } catch (e) { Swal.fire('ผิดพลาด', 'ดึงข้อมูลล้มเหลว', 'error'); }
+        }
+
+        function renderDimTable() {
+            const tbody = document.getElementById('dimTable').querySelector('tbody'); tbody.innerHTML = '';
+            globalDimensions.forEach(dim => {
+                tbody.innerHTML += `<tr class="border-b hover:bg-slate-50"><td class="p-3 text-center font-bold text-gray-700">${dim.no}</td><td class="p-3">${dim.name}</td><td class="p-3 text-center"><button onclick="editDim(${dim.no}, '${dim.name}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button><button onclick="delData('Dimension', ${dim.no})" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+        }
+        function clearDimForm() { document.getElementById('oldDimNo').value = ''; document.getElementById('dimNo').value = ''; document.getElementById('dimName').value = ''; }
+        function editDim(no, name) { document.getElementById('oldDimNo').value = no; document.getElementById('dimNo').value = no; document.getElementById('dimName').value = name; }
+        
+        async function saveDimension() {
+            const data = { year: document.getElementById('configYear').value, oldNo: document.getElementById('oldDimNo').value, no: document.getElementById('dimNo').value, name: document.getElementById('dimName').value };
+            if(!data.no || !data.name) return Swal.fire('เตือน', 'กรุณาระบุข้อมูล', 'warning');
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveDimension', data: data }) });
+            if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', '', 'success'); clearDimForm(); loadConfigData(); }
+        }
+
+        function renderQTable() {
+            const tbody = document.getElementById('qTable').querySelector('tbody'); tbody.innerHTML = '';
+            let sortedQ = [...globalQuestions].sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
+            sortedQ.forEach(q => {
+                tbody.innerHTML += `<tr class="border-b hover:bg-slate-50"><td class="p-3 text-center font-bold text-blue-800">${q.dimNo}</td><td class="p-3 font-semibold text-gray-700">${q.code}</td><td class="p-3 text-sm">${q.text}</td><td class="p-3 text-center"><button onclick="editQuestion(${q.dimNo}, '${q.code}', '${q.text.replace(/'/g, "\\'")}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button><button onclick="delData('Question', '${q.code}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+        }
+        function clearQForm() { document.getElementById('oldQCode').value = ''; document.getElementById('qDimSelect').value = ''; document.getElementById('qCode').value = ''; document.getElementById('qText').value = ''; }
+        function editQuestion(dimNo, code, text) { document.getElementById('oldQCode').value = code; document.getElementById('qDimSelect').value = dimNo; document.getElementById('qCode').value = code; document.getElementById('qText').value = text; }
+        
+        async function saveQuestion() {
+            const data = { year: document.getElementById('configYear').value, oldCode: document.getElementById('oldQCode').value, dimNo: document.getElementById('qDimSelect').value, code: document.getElementById('qCode').value, text: document.getElementById('qText').value };
+            if(!data.dimNo || !data.code || !data.text) return Swal.fire('เตือน', 'กรุณาระบุข้อมูลให้ครบ', 'warning');
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveQuestion', data: data }) });
+            if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', '', 'success'); clearQForm(); loadConfigData(); }
+        }
+
+        async function delData(type, key) {
+            const conf = await Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ใช่, ลบเลย' });
+            if(conf.isConfirmed) {
+                Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                let action = type === 'Dimension' ? 'deleteDimension' : 'deleteQuestion';
+                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: action, year: document.getElementById('configYear').value, key: key }) });
+                if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', 'ลบแล้ว', 'success'); loadConfigData(); }
+            }
+        }
+
+        // ------------------ ระบบคะแนน (ตาราง 6 ปี & กราฟ Dashboard) ------------------
+        function getScoreColorClass(score) {
+            if(score === null || score === '' || isNaN(score)) return '';
+            if(score >= 80) return 'score-green';
+            if(score >= 70) return 'score-yellow';
+            if(score >= 60) return 'score-orange';
+            return 'score-red';
+        }
+
+        async function loadScoreData(mode) {
+            Swal.fire({ title: 'กำลังดึงข้อมูลฐานคะแนน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getScoreData' }) });
+                let data = await res.json();
+                globalDimensions = data.dims;
+                globalQuestions = data.questions;
+                globalResults = data.results;
+                Swal.close();
+
+                if(mode === 'result') renderResultTableAndDropdown();
+                if(mode === 'dashboard') renderDashboardCharts();
+            } catch (e) { Swal.fire('ผิดพลาด', 'ดึงข้อมูลไม่สำเร็จ', 'error'); }
+        }
+
+        function renderResultTableAndDropdown() {
+            const sel = document.getElementById('resCode');
+            sel.innerHTML = '<option value="">-- เลือกข้อคำถาม --</option>';
+            let sortedQ = [...globalQuestions].sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
+            sortedQ.forEach(q => sel.innerHTML += `<option value="${q.code}">[${q.code}] ${q.text.substring(0,80)}...</option>`);
+
+            const tbody = document.getElementById('resultTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            globalDimensions.forEach(dim => {
+                let qs = sortedQ.filter(q => q.dimNo === dim.no);
+                if(qs.length === 0) return;
+
+                qs.forEach((q, index) => {
+                    let tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-slate-50 transition";
+                    if(index === 0) {
+                        tr.innerHTML += `<td class="p-3 bg-blue-50 font-semibold text-blue-900 align-top border-r-2 border-white" rowspan="${qs.length}">${dim.no}. ${dim.name}</td>`;
+                    }
+                    tr.innerHTML += `<td class="p-3 bg-white"><span class="font-bold text-blue-800">${q.code}</span>: ${q.text}</td>`;
+                    
+                    YEARS.forEach(y => {
+                        let r = globalResults.find(res => res.year == y && res.code == q.code);
+                        let scoreText = r ? r.score : '-';
+                        let colorClass = r ? getScoreColorClass(r.score) : 'bg-gray-50 text-gray-300';
+                        tr.innerHTML += `<td class="p-3 text-center ${colorClass}">${scoreText}</td>`;
+                    });
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        async function submitResult() {
+            const year = document.getElementById('resYear').value;
+            const code = document.getElementById('resCode').value;
+            const score = document.getElementById('resScore').value;
+            
+            if(!code || !score) return Swal.fire('เตือน', 'กรุณาเลือกข้อคำถามและระบุคะแนน', 'warning');
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            const reqData = { year: year, code: code, score: parseFloat(score) };
+            let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveResult', data: reqData }) });
+            if((await res.json()).status === 'success') {
+                Swal.fire({title: 'สำเร็จ', icon: 'success', timer: 1500, showConfirmButton: false});
+                document.getElementById('resScore').value = '';
+                loadScoreData('result'); 
+            }
+        }
+
+        function renderDashboardCharts() {
+            const grid = document.getElementById('dashboardGrid');
+            grid.innerHTML = '';
+            
+            let dimAverages = {};
+            globalDimensions.forEach(d => {
+                dimAverages[d.no] = { name: d.name, data: [] };
+                YEARS.forEach(y => {
+                    let qs = globalQuestions.filter(q => q.dimNo === d.no).map(q => q.code);
+                    let scores = globalResults.filter(r => r.year == y && qs.includes(r.code)).map(r => r.score);
+                    if(scores.length > 0) {
+                        let avg = scores.reduce((a,b) => a+b, 0) / scores.length;
+                        dimAverages[d.no].data.push(avg.toFixed(1));
+                    } else { dimAverages[d.no].data.push(null); }
+                });
+            });
+
+            globalDimensions.forEach(d => {
+                let card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl shadow-md border-t-4 border-blue-600 flex flex-col justify-between hover:shadow-lg transition";
+                card.innerHTML = `
+                    <h3 class="text-sm font-bold text-blue-900 mb-3 leading-tight" title="${d.name}">มิติที่ ${d.no}: ${d.name}</h3>
+                    <div class="h-44 relative w-full"><canvas id="chart_dim_${d.no}"></canvas></div>
+                `;
+                grid.appendChild(card);
+
+                if(chartInstances[d.no]) chartInstances[d.no].destroy();
+                const ctx = document.getElementById(`chart_dim_${d.no}`).getContext('2d');
+                chartInstances[d.no] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: YEARS.map(String),
+                        datasets: [{
+                            label: 'คะแนนเฉลี่ยมิติ',
+                            data: dimAverages[d.no].data,
+                            borderColor: '#1e40af',
+                            backgroundColor: 'rgba(30, 64, 175, 0.1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: function(context) {
+                                let val = context.raw;
+                                if(!val) return '#fff';
+                                if(val >= 80) return '#10b981'; 
+                                if(val >= 70) return '#eab308'; 
+                                if(val >= 60) return '#f97316'; 
+                                return '#ef4444'; 
+                            },
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 1,
+                            pointRadius: 6, pointHoverRadius: 8, fill: true, tension: 0.3, spanGaps: true
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return 'คะแนนเฉลี่ย: ' + context.parsed.y; } } } },
+                        scales: { 
+                            y: { min: 40, max: 100, ticks: { stepSize: 20, color: '#94a3b8' }, grid: { borderDash: [4, 4] } },
+                            x: { ticks: { color: '#64748b' }, grid: { display: false } }
+                        }
+                    }
+                });
+            });
+        }
+
+        // ------------------ ระบบ Tracking (Upload SheetJS) ------------------
         async function handleFileUpload(type) {
             const fileInput = document.getElementById(type + 'File');
             const file = fileInput.files[0];
             const year = document.getElementById(type + 'Year').value;
-            
             if (!file) return Swal.fire('เตือน', 'กรุณาเลือกไฟล์ Excel', 'warning');
             
             Swal.fire({ title: 'กำลังอ่านไฟล์ Excel...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -339,19 +650,16 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonPayload = XLSX.utils.sheet_to_json(worksheet, {defval: ""}); // defval="" ให้ค่าว่างมาด้วย
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonPayload = XLSX.utils.sheet_to_json(worksheet, {defval: ""}); 
                     
-                    // ตรวจสอบหัวคอลัมน์คร่าวๆ
                     if(jsonPayload.length > 0) {
                         const keys = Object.keys(jsonPayload[0]);
                         if(!keys.includes("รหัสบุคลากร") || !keys.includes("กลุ่ม")) {
-                            return Swal.fire('ไฟล์ไม่ถูกต้อง', 'ไม่พบคอลัมน์ "รหัสบุคลากร" หรือ "กลุ่ม" กรุณาตรวจสอบรูปแบบไฟล์', 'error');
+                            return Swal.fire('ไฟล์ไม่ถูกต้อง', 'ไม่พบคอลัมน์ "รหัสบุคลากร" หรือ "กลุ่ม"', 'error');
                         }
                     }
 
-                    // ส่ง JSON ขึ้น Google Sheet (ก้อนเดียวจบ)
                     Swal.fire({ title: 'กำลังบันทึกฐานข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     const reqData = { year: year, type: type, payload: jsonPayload };
                     let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveTrackingUpload', data: reqData }) });
@@ -359,12 +667,10 @@
                     
                     if(result.status === 'success') {
                         Swal.fire('อัพโหลดสำเร็จ!', 'เวลา: ' + result.timestamp, 'success');
-                        fileInput.value = ''; // clear input
-                        loadTrackingStatus(type); // รีเฟรชสถานะหน้าเว็บ
+                        fileInput.value = ''; 
+                        loadTrackingStatus(type); 
                     }
-                } catch(err) {
-                    Swal.fire('ผิดพลาด', 'ไม่สามารถประมวลผลไฟล์ได้: ' + err.message, 'error');
-                }
+                } catch(err) { Swal.fire('ผิดพลาด', 'ไม่สามารถประมวลผลไฟล์ได้', 'error'); }
             };
             reader.readAsArrayBuffer(file);
         }
@@ -380,35 +686,28 @@
             
             if(result.status === 'success') {
                 if(type === 'master' && result.master) {
-                    card.classList.remove('hidden');
-                    timeText.innerText = "อัพโหลดล่าสุด: " + result.master.timestamp;
+                    card.classList.remove('hidden'); timeText.innerText = "อัพโหลดล่าสุด: " + result.master.timestamp;
                 }
                 if(type === 'record' && result.record) {
-                    card.classList.remove('hidden');
-                    timeText.innerText = "อัพโหลดล่าสุด: " + result.record.timestamp;
+                    card.classList.remove('hidden'); timeText.innerText = "อัพโหลดล่าสุด: " + result.record.timestamp;
                 }
             }
         }
 
         async function deleteUpload(type) {
             const year = document.getElementById(type + 'Year').value;
-            const conf = await Swal.fire({ title: 'ยืนยันการลบ?', text: "ลบไฟล์ที่อัพโหลดไว้ของปีนี้?", icon: 'warning', showCancelButton: true });
+            const conf = await Swal.fire({ title: 'ยืนยันการลบ?', text: "ลบไฟล์ที่อัพโหลดไว้?", icon: 'warning', showCancelButton: true });
             if(conf.isConfirmed) {
                 Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'deleteTrackingUpload', year: year, type: type }) });
-                if((await res.json()).status === 'success') {
-                    Swal.fire('ลบสำเร็จ', '', 'success');
-                    loadTrackingStatus(type);
-                }
+                if((await res.json()).status === 'success') { Swal.fire('ลบสำเร็จ', '', 'success'); loadTrackingStatus(type); }
             }
         }
 
-        // ================== ระบบ ประมวลผลและแสดงตาราง (Summary) ==================
-        let detailedReportData = [];
-
+        // ------------------ ระบบ Tracking (Summary Logic) ------------------
         async function generateSummary() {
             const year = document.getElementById('summaryYear').value;
-            Swal.fire({ title: 'กำลังดึงและวิเคราะห์ข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'กำลังวิเคราะห์ข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             
             let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getTrackingUploads', year: year }) });
             let result = await res.json();
@@ -417,111 +716,68 @@
             if(!result.master) return Swal.fire('ไม่พบข้อมูล', 'กรุณาอัพโหลด "ไฟล์ข้อมูลบุคลากร" ของปี ' + year + ' ก่อนครับ', 'warning');
             if(!result.record) return Swal.fire('ไม่พบข้อมูล', 'กรุณาอัพโหลด "Import HSCS record" ของปี ' + year + ' ก่อนครับ', 'warning');
 
-            const masterData = result.master.data;
-            const recordData = result.record.data;
-
-            processComparison(masterData, recordData);
+            processComparison(result.master.data, result.record.data);
         }
 
         function processComparison(masterData, recordData) {
-            // โครงสร้างสถิติตามกลุ่มเป้าหมาย
             let stats = {
                 'ผู้บริหาร': { total: 0, done: 0 },
                 'สายวิชาชีพสาธารณสุข': { total: 0, done: 0 },
                 'สายสนับสนุนทางการแพทย์': { total: 0, done: 0 },
                 'สายสนับสนุนทั่วไป': { total: 0, done: 0 }
             };
-
             detailedReportData = [];
 
             masterData.forEach(m => {
                 let sId = String(m['รหัสบุคลากร'] || '').trim();
                 let mGroup = String(m['กลุ่ม'] || '').trim();
                 let mArea = String(m['พื้นที่ปฏิบัติงาน'] || '').trim();
-
-                if(!sId) return; // Skip empty rows
+                if(!sId) return; 
                 
-                // เก็บ Total
                 if(stats[mGroup] !== undefined) stats[mGroup].total++;
 
-                // หาข้อมูลใน Record
                 let r = recordData.find(rec => String(rec['รหัสบุคลากร'] || '').trim() === sId);
+                let status = "ปกติ"; 
 
-                let status = "ปกติ"; // ค่าเริ่มต้น
-                let isDone = false;
-
-                if (!r) {
-                    status = "not_started"; // ไม่มีในไฟล์ Record
-                } else {
+                if (!r) { status = "not_started"; } 
+                else {
                     let rGroup = String(r['กลุ่ม'] || '').trim();
-                    let p1 = r['ส่วนที่ 1'];
-                    let p2 = r['ส่วนที่ 2'];
+                    let p1 = r['ส่วนที่ 1']; let p2 = r['ส่วนที่ 2'];
 
-                    // เช็คช่องว่าง (Not started ถ้าว่างหมด หรือ ในไฟล์ record มีแต่คอลัมน์ว่าง)
-                    if(!p1 && !p2 && !rGroup) {
-                        status = "not_started";
-                    } 
-                    // เช็คทำไม่ครบ
-                    else if(!p1 || !p2) {
-                        status = "incomplete";
-                    } 
-                    // เช็คกรอกครบ
-                    else {
-                        isDone = true;
-                        if(stats[mGroup] !== undefined) stats[mGroup].done++;
-                    }
+                    if(!p1 && !p2 && !rGroup) status = "not_started";
+                    else if(!p1 || !p2) status = "incomplete";
+                    else if(stats[mGroup] !== undefined) stats[mGroup].done++;
 
-                    // เช็คกลุ่มผิด (แยกอิสระ)
-                    if(rGroup && mGroup !== rGroup) {
-                        status = "wrong_group";
-                        // ถึงเลือกผิด ถ้าทำครบก็นับให้ (ตามหลักการทั่วไป แต่แยกรายงานได้)
-                    }
+                    if(rGroup && mGroup !== rGroup) status = "wrong_group";
                 }
 
-                // ถ้าสถานะไม่ใช่ปกติ (หรือมีปัญหา) ให้ใส่ลงรายงาน
                 if (status !== "ปกติ") {
-                    detailedReportData.push({
-                        sId: sId,
-                        area: mArea,
-                        mGroup: mGroup,
-                        rGroup: r ? (r['กลุ่ม'] || '-') : '-',
-                        status: status
-                    });
+                    detailedReportData.push({ sId: sId, area: mArea, mGroup: mGroup, rGroup: r ? (r['กลุ่ม'] || '-') : '-', status: status });
                 }
             });
-
-            renderStatTable(stats);
-            renderDetailTable();
+            renderStatTable(stats); renderDetailTable();
         }
 
         function renderStatTable(stats) {
             const tbody = document.getElementById('statTable').querySelector('tbody');
             const theadTr = document.getElementById('statTable').querySelector('thead').querySelectorAll('tr')[1];
             
-            // วาด sub-headers
             let subHeadersHTML = '';
             for(let i=0; i<5; i++) {
                 subHeadersHTML += `<th class="p-2 border border-slate-200 font-semibold">ทั้งหมด</th><th class="p-2 border border-slate-200 font-semibold text-blue-600">ขั้นต่ำ</th><th class="p-2 border border-slate-200 font-semibold text-green-600">กรอกแล้ว</th><th class="p-2 border border-slate-200 font-semibold">%</th>`;
             }
             theadTr.innerHTML = subHeadersHTML;
 
-            // คำนวณยอดรวม
             let order = ['ผู้บริหาร', 'สายวิชาชีพสาธารณสุข', 'สายสนับสนุนทางการแพทย์', 'สายสนับสนุนทั่วไป'];
             let sumTotal = 0, sumDone = 0, sumMin = 0;
-
             let rowHTML = '<tr class="bg-white">';
-            order.forEach(g => {
-                let total = stats[g].total;
-                let done = stats[g].done;
-                let minReq = Math.ceil(total * 0.606); // คำนวณขั้นต่ำประมาณ 60% ปัดขึ้น (จากภาพตัวอย่าง 33->20)
-                let pct = total > 0 ? ((done/total)*100).toFixed(2) : '0.00';
-                
-                sumTotal += total; sumDone += done; sumMin += minReq;
 
+            order.forEach(g => {
+                let total = stats[g].total; let done = stats[g].done; let minReq = Math.ceil(total * 0.606); 
+                let pct = total > 0 ? ((done/total)*100).toFixed(2) : '0.00';
+                sumTotal += total; sumDone += done; sumMin += minReq;
                 rowHTML += `<td class="p-3 border">${total}</td><td class="p-3 border text-blue-600 font-bold">${minReq}</td><td class="p-3 border text-green-600 font-bold">${done}</td><td class="p-3 border">${pct}</td>`;
             });
-
-            // คอลัมน์ทั้งหมด (ขวาสุด)
             let sumPct = sumTotal > 0 ? ((sumDone/sumTotal)*100).toFixed(2) : '0.00';
             rowHTML += `<td class="p-3 border font-bold bg-slate-50">${sumTotal}</td><td class="p-3 border text-blue-600 font-bold bg-slate-50">${sumMin}</td><td class="p-3 border text-green-600 font-bold bg-slate-50">${sumDone}</td><td class="p-3 border font-bold bg-slate-50">${sumPct}</td></tr>`;
             
@@ -534,13 +790,10 @@
             tbody.innerHTML = '';
 
             let filtered = detailedReportData;
-            if(filter !== 'all') {
-                filtered = detailedReportData.filter(d => d.status === filter);
-            }
+            if(filter !== 'all') filtered = detailedReportData.filter(d => d.status === filter);
 
             if(filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-green-600 font-bold"><i class="fas fa-check-circle"></i> ไม่พบข้อมูลที่มีปัญหาในหมวดหมู่นี้</td></tr>';
-                return;
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-green-600 font-bold"><i class="fas fa-check-circle"></i> ไม่พบข้อมูลที่มีปัญหาในหมวดหมู่นี้</td></tr>'; return;
             }
 
             filtered.forEach(d => {
@@ -549,15 +802,7 @@
                 else if(d.status === 'incomplete') statusBadge = '<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">ไม่ครบ (ส่วน 1/2 ว่าง)</span>';
                 else if(d.status === 'wrong_group') statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">เลือกกลุ่มผิด</span>';
 
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 font-semibold">${d.sId}</td>
-                        <td class="p-3 text-gray-600">${d.area}</td>
-                        <td class="p-3">${d.mGroup}</td>
-                        <td class="p-3 ${d.status === 'wrong_group' ? 'text-red-500 font-bold' : ''}">${d.rGroup}</td>
-                        <td class="p-3">${statusBadge}</td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${d.sId}</td><td class="p-3 text-gray-600">${d.area}</td><td class="p-3">${d.mGroup}</td><td class="p-3 ${d.status === 'wrong_group' ? 'text-red-500 font-bold' : ''}">${d.rGroup}</td><td class="p-3">${statusBadge}</td></tr>`;
             });
         }
     </script>
