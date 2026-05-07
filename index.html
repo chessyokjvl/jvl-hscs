@@ -92,7 +92,7 @@
                     <i class="fas fa-chart-line mr-3"></i> Dashboard
                 </div>
                 
-                <div>
+                <div id="menuHscsGroup">
                     <div class="p-3 hover:bg-blue-700 rounded cursor-pointer flex justify-between items-center transition" onclick="toggleAccordion('hscsSub')">
                         <span><i class="fas fa-file-alt mr-3"></i> ผล HSCS รายปี</span><i class="fas fa-chevron-down text-xs"></i>
                     </div>
@@ -102,7 +102,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div id="menuTrackGroup">
                     <div class="p-3 hover:bg-blue-700 rounded cursor-pointer flex justify-between items-center transition" onclick="toggleAccordion('trackSub')">
                         <span><i class="fas fa-users-cog mr-3"></i> ติดตามการประเมิน</span><i class="fas fa-chevron-down text-xs"></i>
                     </div>
@@ -193,12 +193,7 @@
                             <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-save"></i> บันทึกมิติ</button>
                             <button onclick="clearDimForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                         </div>
-                        <div class="overflow-x-auto border rounded">
-                            <table class="w-full text-left text-sm" id="dimTable">
-                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                        <div class="overflow-x-auto border rounded"><table class="w-full text-left text-sm" id="dimTable"><thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead><tbody></tbody></table></div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
@@ -222,12 +217,7 @@
                                 <button onclick="clearQForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto border rounded">
-                            <table class="w-full text-left text-sm" id="qTable">
-                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                        <div class="overflow-x-auto border rounded"><table class="w-full text-left text-sm" id="qTable"><thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead><tbody></tbody></table></div>
                     </div>
                 </div>
 
@@ -477,7 +467,23 @@
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
             document.getElementById('userProfile').innerHTML = `<i class="fas fa-user-circle mr-2 text-lg"></i> ${currentUser.username} <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">${currentUser.role}</span>`;
-            if(currentUser.role === 'Admin') document.getElementById('adminMenu').classList.remove('hidden');
+            
+            // แสดง/ซ่อน เมนูตามสิทธิ์
+            if(currentUser.role === 'Admin') {
+                document.getElementById('adminMenu').classList.remove('hidden');
+            } else {
+                document.getElementById('adminMenu').classList.add('hidden');
+            }
+
+            // ถ้าเป็น Guest ให้ซ่อนเมนูจัดการข้อมูล
+            if(currentUser.role === 'Guest') {
+                document.getElementById('menuHscsGroup').classList.add('hidden');
+                document.getElementById('menuTrackGroup').classList.add('hidden');
+            } else {
+                document.getElementById('menuHscsGroup').classList.remove('hidden');
+                document.getElementById('menuTrackGroup').classList.remove('hidden');
+            }
+
             switchVersion('v10'); 
             Swal.close();
         }
@@ -486,6 +492,12 @@
         function toggleAccordion(id) { document.getElementById(id).classList.toggle('hidden'); }
         
         function switchPage(page) {
+            // ระบบ Guard ป้องกัน Guest พิมพ์ URL เข้าหน้าอื่น
+            if (currentUser.role === 'Guest' && page !== 'dashboard') {
+                 Swal.fire('ปฏิเสธการเข้าถึง', 'โหมด Guest สามารถเข้าชมได้เฉพาะ Dashboard เท่านั้นครับ', 'warning');
+                 return;
+            }
+
             document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
             document.getElementById(page + 'Page').classList.remove('hidden');
             
@@ -745,7 +757,7 @@
                 }
             });
 
-            // 2. กราฟ 10/12 มิติ (แสดงเฉพาะช่วงปีของ Version นั้นๆ)
+            // 2. กราฟ 10/12 มิติ (ใช้ activeYears ตาม Version ที่เลือก)
             let dimAverages = {};
             currentDims.forEach(d => {
                 dimAverages[d.no] = { name: d.name, data: [] };
