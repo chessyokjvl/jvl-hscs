@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JVL-HSCS | ระบบบริหารจัดการวัฒนธรรมความปลอดภัย</title>
     
-    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Plugin สำหรับแสดงตัวเลขบน Bar Chart -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -39,7 +37,6 @@
 </head>
 <body class="bg-slate-50">
 
-    <!-- ================== LOGIN OVERLAY ================== -->
     <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-jvl px-4">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 transform transition-all relative">
             <div id="loginSection">
@@ -82,10 +79,8 @@
         </div>
     </div>
 
-    <!-- ================== MAIN INTERFACE ================== -->
     <div id="mainApp" class="hidden flex h-screen overflow-hidden">
         
-        <!-- Sidebar -->
         <aside id="sidebar" class="bg-jvl text-white w-64 flex-shrink-0 sidebar-transition flex flex-col">
             <div class="p-5 text-xl font-bold border-b border-blue-800 flex items-center gap-3">
                 <img src="https://www.rploei.go.th/ec2/wp-content/uploads/2017/08/cropped-cropped-cropped-3.png" alt="Logo" class="h-10 bg-white rounded-full p-1 shadow-sm object-contain">
@@ -123,7 +118,6 @@
             </nav>
         </aside>
 
-        <!-- Content Area -->
         <main class="flex-grow flex flex-col">
             <header class="bg-white shadow p-4 flex items-center justify-between z-10">
                 <button onclick="toggleSidebar()" class="text-blue-900 text-xl hover:bg-slate-100 p-2 rounded transition"><i class="fas fa-bars"></i></button>
@@ -132,13 +126,11 @@
             
             <section id="contentBody" class="p-6 overflow-y-auto h-full bg-slate-100">
                 
-                <!-- ================== 1. Dashboard Page ================== -->
                 <div id="dashboardPage" class="page-section">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">Dashboard ภาพรวมผลประเมิน</h2>
                     </div>
 
-                    <!-- กราฟติดตามการประเมิน ณ ปัจจุบัน -->
                     <div class="bg-white p-6 rounded-xl shadow mb-8 border-t-4 border-green-500">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-xl font-bold text-green-700"><i class="fas fa-poll"></i> ความคืบหน้าการตอบแบบประเมิน</h3>
@@ -148,33 +140,40 @@
                                 <option value="2571">ปี 2571</option>
                             </select>
                         </div>
-                        <!-- Canvas สำหรับ Bar Chart -->
                         <div class="relative w-full" style="height: 350px;">
                             <canvas id="trackingChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- กราฟ 12 มิติ -->
+                    <div class="bg-white p-6 rounded-xl shadow mb-8 border-t-4 border-yellow-500">
+                        <h3 class="text-xl font-bold text-yellow-600 mb-4"><i class="fas fa-star"></i> แนวโน้มคะแนนเฉลี่ยภาพรวมทั้งหมด (Overall Score)</h3>
+                        <div class="relative w-full" style="height: 350px;">
+                            <canvas id="overallScoreChart"></canvas>
+                        </div>
+                    </div>
+
                     <h3 class="text-xl font-bold text-blue-900 mb-4 border-b-2 border-blue-200 pb-2">แนวโน้มคะแนนเฉลี่ยรายมิติ</h3>
                     <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10"></div>
                 </div>
 
-                <!-- ================== 2. ตั้งค่าข้อคำถาม ================== -->
                 <div id="configQuestionPage" class="page-section hidden">
-                    <div class="flex justify-between items-center mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">ตั้งค่าข้อคำถามการประเมิน</h2>
-                        <select id="configYear" class="border p-2 rounded outline-none font-semibold text-blue-900 shadow-sm" onchange="loadConfigData()">
-                            <option value="2564">2564</option><option value="2565">2565</option><option value="2566">2566</option><option value="2567" selected>2567</option><option value="2568">2568</option><option value="2569">2569</option>
-                        </select>
+                        <div class="flex items-center gap-2 bg-white p-2 rounded shadow-sm">
+                            <label class="font-bold text-gray-700">เลือกปีงบประมาณ:</label>
+                            <select id="configYear" class="border p-1 rounded outline-none font-semibold text-blue-900" onchange="loadConfigData()">
+                                <option value="2564">2564</option><option value="2565">2565</option><option value="2566">2566</option><option value="2567" selected>2567</option><option value="2568">2568</option><option value="2569">2569</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-layer-group"></i> 1. จัดการมิติการประเมิน</h3>
-                        <div class="flex gap-4 mb-4">
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
                             <input type="hidden" id="oldDimNo">
-                            <input type="number" id="dimNo" placeholder="ลำดับมิติ" class="border p-2 rounded w-1/4 outline-none">
+                            <input type="number" id="dimNo" placeholder="ลำดับมิติ (เช่น 1)" class="border p-2 rounded md:w-1/4 outline-none">
                             <input type="text" id="dimName" placeholder="ชื่อมิติการประเมิน" class="border p-2 rounded flex-grow outline-none">
-                            <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition">บันทึก</button>
+                            <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-save"></i> บันทึกมิติ</button>
                             <button onclick="clearDimForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                         </div>
                         <div class="overflow-x-auto border rounded">
@@ -187,15 +186,15 @@
 
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-list-ul"></i> 2. จัดการข้อย่อย</h3>
-                        <div class="grid grid-cols-4 gap-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                             <input type="hidden" id="oldQCode">
-                            <select id="qDimSelect" class="border p-2 rounded outline-none col-span-2"><option value="">-- เลือกลำดับและชื่อมิติ --</option></select>
-                            <input type="text" id="qCode" placeholder="รหัสข้อย่อย" class="border p-2 rounded outline-none">
+                            <select id="qDimSelect" class="border p-2 rounded outline-none md:col-span-2"><option value="">-- เลือกลำดับและชื่อมิติ --</option></select>
+                            <input type="text" id="qCode" placeholder="รหัสข้อย่อย (เช่น D1)" class="border p-2 rounded outline-none">
                         </div>
-                        <div class="flex gap-4 mb-4">
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
                             <textarea id="qText" placeholder="รายการข้อย่อย (คำถามประเมิน)" class="border p-2 rounded flex-grow h-20 outline-none"></textarea>
                             <div class="flex flex-col gap-2">
-                                <button onclick="saveQuestion()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow h-full transition">บันทึก</button>
+                                <button onclick="saveQuestion()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow h-full transition"><i class="fas fa-save"></i> บันทึกข้อย่อย</button>
                                 <button onclick="clearQForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                             </div>
                         </div>
@@ -208,7 +207,6 @@
                     </div>
                 </div>
 
-                <!-- ================== 3. Save Result Page ================== -->
                 <div id="saveResultPage" class="page-section hidden">
                     <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">บันทึกผลลัพธ์การประเมินประจำปี</h2>
                     
@@ -253,9 +251,6 @@
                     </div>
                 </div>
 
-                <!-- ================== 4. Tracking Pages ================== -->
-
-                <!-- 4.1 Upload Master -->
                 <div id="uploadMasterPage" class="page-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">Upload ไฟล์ข้อมูลบุคลากร</h2>
@@ -282,7 +277,6 @@
                     </div>
                 </div>
 
-                <!-- 4.2 Upload Record -->
                 <div id="uploadRecordPage" class="page-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">Import HSCS record (ล่าสุด)</h2>
@@ -309,7 +303,6 @@
                     </div>
                 </div>
 
-                <!-- 4.3 Tracking Summary -->
                 <div id="trackingSummaryPage" class="page-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">สรุปผลการประเมิน</h2>
@@ -318,7 +311,6 @@
                         </select>
                     </div>
 
-                    <!-- ตารางสถิติภาพรวม -->
                     <div class="bg-white rounded-xl shadow mb-6 overflow-hidden">
                         <div class="p-4 bg-slate-50 border-b"><h3 class="text-lg font-bold text-blue-900">ข้อมูลส่วนบุคคลของผู้ตอบแบบสำรวจ (เทียบเป้าหมาย)</h3></div>
                         <div class="overflow-x-auto">
@@ -338,7 +330,6 @@
                         </div>
                     </div>
 
-                    <!-- ตารางเจาะลึกรายบุคคล -->
                     <div class="bg-white p-6 rounded-xl shadow">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                             <h3 class="text-lg font-bold text-blue-900">รายละเอียดสถานะบุคลากร</h3>
@@ -375,7 +366,6 @@
                     </div>
                 </div>
 
-                <!-- ================== 5. Manage Users Page ================== -->
                 <div id="manageUsersPage" class="page-section hidden">
                     <h2 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-900 pl-3">จัดการผู้ใช้งานระบบ (Admin Only)</h2>
                     <div class="bg-white p-6 rounded-xl shadow border-t-4 border-red-600">
@@ -394,7 +384,6 @@
         </main>
     </div>
 
-    <!-- ================== JAVASCRIPT ================== -->
     <script>
         // เปลี่ยน URL นี้ให้เป็น URL Web App ของคุณ
         const API = "https://script.google.com/macros/s/AKfycbx_GAxtZMhekPRzuACeau5CaMmIXwsPKRLOIoYAvfwiWj6l3W6zLcE7z4KTxlHXlQuTDQ/exec";
@@ -408,8 +397,7 @@
         let detailedReportData = [];
         let globalUsers = []; 
 
-        // ลงทะเบียน Plugin สำหรับแสดงตัวเลขบนแท่งกราฟ (DataLabels)
-        Chart.register(ChartDataLabels);
+        Chart.register(ChartDataLabels); // ลงทะเบียน Plugin DataLabels
 
         // ------------------ ระบบ UI & Login ------------------
         function toggleAuthView(sectionId) {
@@ -429,12 +417,8 @@
                 if(result.status === 'success') { 
                     currentUser = result.user; 
                     initApp(); 
-                } else { 
-                    Swal.fire('ผิดพลาด', result.message, 'error'); 
-                }
-            } catch (e) { 
-                Swal.fire('ผิดพลาด', 'ติดต่อ Server ไม่ได้', 'error'); 
-            }
+                } else { Swal.fire('ผิดพลาด', result.message, 'error'); }
+            } catch (e) { Swal.fire('ผิดพลาด', 'ติดต่อ Server ไม่ได้', 'error'); }
         }
 
         async function doRegister() {
@@ -449,11 +433,8 @@
             const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'register', username: user, password: pass, email: email }) });
             const result = await res.json();
             
-            if(result.status === 'success') { 
-                Swal.fire('สำเร็จ', result.message, 'success').then(()=> toggleAuthView('loginSection')); 
-            } else { 
-                Swal.fire('ผิดพลาด', result.message, 'error'); 
-            }
+            if(result.status === 'success') { Swal.fire('สำเร็จ', result.message, 'success').then(()=> toggleAuthView('loginSection')); } 
+            else { Swal.fire('ผิดพลาด', result.message, 'error'); }
         }
 
         async function doForgotPassword() {
@@ -466,10 +447,7 @@
             Swal.fire(result.status === 'success' ? 'สำเร็จ' : 'ผิดพลาด', result.message, result.status);
         }
 
-        function guestLogin() { 
-            currentUser = { username: 'Guest', role: 'Guest' }; 
-            initApp(); 
-        }
+        function guestLogin() { currentUser = { username: 'Guest', role: 'Guest' }; initApp(); }
 
         function initApp() {
             document.getElementById('loginPage').classList.add('hidden');
@@ -486,10 +464,7 @@
             side.classList.toggle('hidden'); 
             side.classList.toggle('md:block'); 
         }
-        
-        function toggleAccordion(id) { 
-            document.getElementById(id).classList.toggle('hidden'); 
-        }
+        function toggleAccordion(id) { document.getElementById(id).classList.toggle('hidden'); }
         
         function switchPage(page) {
             document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
@@ -497,10 +472,7 @@
             
             if(page === 'configQuestion') loadConfigData();
             if(page === 'saveResult') loadScoreData('result');
-            if(page === 'dashboard') {
-                loadScoreData('dashboard');
-                loadDashboardTracking(); // วาดกราฟ Bar Chart ใหม่ด้วย
-            }
+            if(page === 'dashboard') { loadScoreData('dashboard'); loadDashboardTracking(); }
             if(page === 'uploadMaster') loadTrackingStatus('master');
             if(page === 'uploadRecord') loadTrackingStatus('record');
             if(page === 'trackingSummary') generateSummary();
@@ -519,116 +491,47 @@
                 let res2 = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getQuestions', year: year }) });
                 globalQuestions = (await res2.json()).data || [];
                 
-                renderDimTable(); 
-                renderQTable();
+                renderDimTable(); renderQTable();
                 
                 const sel = document.getElementById('qDimSelect');
                 sel.innerHTML = '<option value="">-- เลือกลำดับและชื่อมิติ --</option>';
                 globalDimensions.forEach(dim => sel.innerHTML += `<option value="${dim.no}">${dim.no}. ${dim.name}</option>`);
-            } catch (e) { 
-                Swal.fire('ผิดพลาด', 'ดึงข้อมูลล้มเหลว', 'error'); 
-            }
+            } catch (e) { Swal.fire('ผิดพลาด', 'ดึงข้อมูลล้มเหลว', 'error'); }
         }
 
         function renderDimTable() {
-            const tbody = document.getElementById('dimTable').querySelector('tbody'); 
-            tbody.innerHTML = '';
-            
+            const tbody = document.getElementById('dimTable').querySelector('tbody'); tbody.innerHTML = '';
             globalDimensions.forEach(dim => {
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 text-center font-bold text-gray-700">${dim.no}</td>
-                        <td class="p-3">${dim.name}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="editDim(${dim.no}, '${dim.name}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
-                            <button onclick="delData('Dimension', ${dim.no})" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
+                tbody.innerHTML += `<tr class="border-b hover:bg-slate-50"><td class="p-3 text-center font-bold text-gray-700">${dim.no}</td><td class="p-3">${dim.name}</td><td class="p-3 text-center"><button onclick="editDim(${dim.no}, '${dim.name}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button><button onclick="delData('Dimension', ${dim.no})" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         }
-        
-        function clearDimForm() { 
-            document.getElementById('oldDimNo').value = ''; 
-            document.getElementById('dimNo').value = ''; 
-            document.getElementById('dimName').value = ''; 
-        }
-        
-        function editDim(no, name) { 
-            document.getElementById('oldDimNo').value = no; 
-            document.getElementById('dimNo').value = no; 
-            document.getElementById('dimName').value = name; 
-        }
+        function clearDimForm() { document.getElementById('oldDimNo').value = ''; document.getElementById('dimNo').value = ''; document.getElementById('dimName').value = ''; }
+        function editDim(no, name) { document.getElementById('oldDimNo').value = no; document.getElementById('dimNo').value = no; document.getElementById('dimName').value = name; }
         
         async function saveDimension() {
-            const data = { 
-                year: document.getElementById('configYear').value, 
-                oldNo: document.getElementById('oldDimNo').value, 
-                no: document.getElementById('dimNo').value, 
-                name: document.getElementById('dimName').value 
-            };
-            
+            const data = { year: document.getElementById('configYear').value, oldNo: document.getElementById('oldDimNo').value, no: document.getElementById('dimNo').value, name: document.getElementById('dimName').value };
             if(!data.no || !data.name) return Swal.fire('เตือน', 'กรุณาระบุข้อมูล', 'warning');
             Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            
             let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveDimension', data: data }) });
-            if((await res.json()).status === 'success') { 
-                Swal.fire('สำเร็จ', '', 'success'); 
-                clearDimForm(); 
-                loadConfigData(); 
-            }
+            if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', '', 'success'); clearDimForm(); loadConfigData(); }
         }
 
         function renderQTable() {
-            const tbody = document.getElementById('qTable').querySelector('tbody'); 
-            tbody.innerHTML = '';
-            
+            const tbody = document.getElementById('qTable').querySelector('tbody'); tbody.innerHTML = '';
             let sortedQ = [...globalQuestions].sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
             sortedQ.forEach(q => {
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 text-center font-bold text-blue-800">${q.dimNo}</td>
-                        <td class="p-3 font-semibold text-gray-700">${q.code}</td>
-                        <td class="p-3 text-sm">${q.text}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="editQuestion(${q.dimNo}, '${q.code}', '${q.text.replace(/'/g, "\\'")}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button>
-                            <button onclick="delData('Question', '${q.code}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
+                tbody.innerHTML += `<tr class="border-b hover:bg-slate-50"><td class="p-3 text-center font-bold text-blue-800">${q.dimNo}</td><td class="p-3 font-semibold text-gray-700">${q.code}</td><td class="p-3 text-sm">${q.text}</td><td class="p-3 text-center"><button onclick="editQuestion(${q.dimNo}, '${q.code}', '${q.text.replace(/'/g, "\\'")}')" class="text-yellow-600 hover:text-yellow-800 mx-1"><i class="fas fa-edit"></i></button><button onclick="delData('Question', '${q.code}')" class="text-red-600 hover:text-red-800 mx-1"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         }
-        
-        function clearQForm() { 
-            document.getElementById('oldQCode').value = ''; 
-            document.getElementById('qDimSelect').value = ''; 
-            document.getElementById('qCode').value = ''; 
-            document.getElementById('qText').value = ''; 
-        }
-        
-        function editQuestion(dimNo, code, text) { 
-            document.getElementById('oldQCode').value = code; 
-            document.getElementById('qDimSelect').value = dimNo; 
-            document.getElementById('qCode').value = code; 
-            document.getElementById('qText').value = text; 
-        }
+        function clearQForm() { document.getElementById('oldQCode').value = ''; document.getElementById('qDimSelect').value = ''; document.getElementById('qCode').value = ''; document.getElementById('qText').value = ''; }
+        function editQuestion(dimNo, code, text) { document.getElementById('oldQCode').value = code; document.getElementById('qDimSelect').value = dimNo; document.getElementById('qCode').value = code; document.getElementById('qText').value = text; }
         
         async function saveQuestion() {
-            const data = { 
-                year: document.getElementById('configYear').value, 
-                oldCode: document.getElementById('oldQCode').value, 
-                dimNo: document.getElementById('qDimSelect').value, 
-                code: document.getElementById('qCode').value, 
-                text: document.getElementById('qText').value 
-            };
+            const data = { year: document.getElementById('configYear').value, oldCode: document.getElementById('oldQCode').value, dimNo: document.getElementById('qDimSelect').value, code: document.getElementById('qCode').value, text: document.getElementById('qText').value };
             if(!data.dimNo || !data.code || !data.text) return Swal.fire('เตือน', 'กรุณาระบุข้อมูลให้ครบ', 'warning');
-            
             Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            
             let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'saveQuestion', data: data }) });
-            if((await res.json()).status === 'success') { 
-                Swal.fire('สำเร็จ', '', 'success'); 
-                clearQForm(); 
-                loadConfigData(); 
-            }
+            if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', '', 'success'); clearQForm(); loadConfigData(); }
         }
 
         async function delData(type, key) {
@@ -637,14 +540,11 @@
                 Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 let action = type === 'Dimension' ? 'deleteDimension' : 'deleteQuestion';
                 let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: action, year: document.getElementById('configYear').value, key: key }) });
-                if((await res.json()).status === 'success') { 
-                    Swal.fire('สำเร็จ', 'ลบแล้ว', 'success'); 
-                    loadConfigData(); 
-                }
+                if((await res.json()).status === 'success') { Swal.fire('สำเร็จ', 'ลบแล้ว', 'success'); loadConfigData(); }
             }
         }
 
-        // ------------------ ระบบคะแนน (ตาราง 6 ปี & กราฟ Dashboard 12 มิติ) ------------------
+        // ------------------ ระบบคะแนน (ตาราง 6 ปี & กราฟ Dashboard) ------------------
         function getScoreColorClass(score) {
             if(score === null || score === '' || isNaN(score)) return '';
             if(score >= 80) return 'score-green';
@@ -659,16 +559,12 @@
                 let res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getScoreData' }) });
                 let data = await res.json();
                 
-                globalDimensions = data.dims; 
-                globalQuestions = data.questions; 
-                globalResults = data.results;
+                globalDimensions = data.dims; globalQuestions = data.questions; globalResults = data.results;
                 Swal.close();
 
                 if(mode === 'result') renderResultTableAndDropdown();
                 if(mode === 'dashboard') renderDashboardCharts();
-            } catch (e) { 
-                Swal.fire('ผิดพลาด', 'ดึงข้อมูลไม่สำเร็จ', 'error'); 
-            }
+            } catch (e) { Swal.fire('ผิดพลาด', 'ดึงข้อมูลไม่สำเร็จ', 'error'); }
         }
 
         function renderResultTableAndDropdown() {
@@ -680,6 +576,19 @@
             const tbody = document.getElementById('resultTable').querySelector('tbody'); 
             tbody.innerHTML = '';
             
+            // --- เพิ่มแถว: คะแนนเฉลี่ยภาพรวมทั้งหมด (Overall Average) ด้านบนสุด ---
+            let overallTr = document.createElement('tr');
+            overallTr.className = "bg-blue-100 font-bold text-blue-900 border-b-4 border-blue-300";
+            overallTr.innerHTML = `<td colspan="2" class="p-3 text-right">คะแนนเฉลี่ยภาพรวมทั้งหมดทุกมิติ:</td>`;
+            YEARS.forEach(y => {
+                let scoresThisYear = globalResults.filter(r => r.year == y).map(r => r.score);
+                let avg = scoresThisYear.length > 0 ? (scoresThisYear.reduce((a,b)=>a+b,0)/scoresThisYear.length).toFixed(1) : '-';
+                let colorClass = avg !== '-' ? getScoreColorClass(parseFloat(avg)) : 'text-gray-400';
+                overallTr.innerHTML += `<td class="p-3 text-center ${colorClass}">${avg}</td>`;
+            });
+            tbody.appendChild(overallTr);
+
+            // --- ข้อมูลรายมิติและข้อย่อย ---
             globalDimensions.forEach(dim => {
                 let qs = sortedQ.filter(q => q.dimNo === dim.no);
                 if(qs.length === 0) return;
@@ -725,6 +634,62 @@
             const grid = document.getElementById('dashboardGrid'); 
             grid.innerHTML = '';
             
+            // 1. ประมวลผลคะแนนเฉลี่ยภาพรวมทั้งหมด (Overall Score)
+            let overallAverages = [];
+            YEARS.forEach(y => {
+                let scoresThisYear = globalResults.filter(r => r.year == y).map(r => r.score);
+                let avg = scoresThisYear.length > 0 ? (scoresThisYear.reduce((a,b)=>a+b,0)/scoresThisYear.length).toFixed(1) : null;
+                overallAverages.push(avg);
+            });
+
+            if(chartInstances['overall']) chartInstances['overall'].destroy();
+            const ctxOverall = document.getElementById('overallScoreChart').getContext('2d');
+            chartInstances['overall'] = new Chart(ctxOverall, {
+                type: 'line',
+                data: {
+                    labels: YEARS.map(String),
+                    datasets: [{
+                        label: 'คะแนนเฉลี่ยภาพรวม',
+                        data: overallAverages,
+                        borderColor: '#ca8a04', // สีทอง/เหลืองเข้ม
+                        backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: function(context) { 
+                            let val = context.raw; 
+                            if(!val) return '#fff'; 
+                            if(val >= 80) return '#10b981'; 
+                            if(val >= 70) return '#eab308'; 
+                            if(val >= 60) return '#f97316'; 
+                            return '#ef4444'; 
+                        },
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 7,
+                        pointHoverRadius: 9,
+                        fill: true, tension: 0.3, spanGaps: true
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: {
+                            align: 'top',
+                            color: '#1e3a8a',
+                            font: { weight: 'bold', family: 'Sarabun', size: 14 },
+                            formatter: function(value) { return value ? value : ''; }
+                        },
+                        tooltip: { callbacks: { label: function(context) { return 'คะแนนเฉลี่ย: ' + context.parsed.y; } } }
+                    },
+                    scales: {
+                        y: { min: 40, max: 100, ticks: { stepSize: 10, color: '#94a3b8' }, grid: { borderDash: [4, 4] } },
+                        x: { ticks: { color: '#64748b', font: {weight: 'bold', size: 14} }, grid: { display: false } }
+                    },
+                    layout: { padding: { top: 20 } }
+                }
+            });
+
+            // 2. ประมวลผลคะแนน 12 มิติ
             let dimAverages = {};
             globalDimensions.forEach(d => {
                 dimAverages[d.no] = { name: d.name, data: [] };
@@ -772,7 +737,7 @@
                             }, 
                             pointBorderColor: '#fff', 
                             pointBorderWidth: 1, 
-                            pointRadius: 5, 
+                            pointRadius: 4, 
                             fill: true, 
                             tension: 0.3, 
                             spanGaps: true 
@@ -783,7 +748,7 @@
                         maintainAspectRatio: false, 
                         plugins: { 
                             legend: { display: false }, 
-                            datalabels: { display: false } // ปิด DataLabels สำหรับกราฟเส้น
+                            datalabels: { display: false } // ปิด DataLabels สำหรับกราฟมิติเล็ก
                         }, 
                         scales: { 
                             y: { min: 40, max: 100, ticks: { stepSize: 20, color: '#94a3b8' }, grid: { borderDash: [4, 4] } }, 
@@ -794,7 +759,7 @@
             });
         }
 
-        // ------------------ ระบบ Dashboard Bar Chart (ของใหม่) ------------------
+        // ------------------ ระบบ Dashboard Bar Chart (Tracking) ------------------
         async function loadDashboardTracking() {
             const year = document.getElementById('dashTrackYear').value;
             
@@ -824,7 +789,6 @@
                             let p1 = r['ส่วนที่ 1']; 
                             let p2 = r['ส่วนที่ 2'];
 
-                            // เงื่อนไขทำครบ (ไม่สนใจว่าจะเลือกกลุ่มผิดหรือไม่)
                             if((p1 || p2) || rGroup) {
                                 if(!(!p1 && !p2 && !rGroup) && !(!p1 || !p2)) {
                                     if(stats[mGroup] !== undefined) stats[mGroup].done++;
@@ -836,11 +800,9 @@
                     renderDashboardBarChart(stats);
                     
                 } else {
-                    // หากไม่มีข้อมูล ให้วาดกราฟเปล่าๆ
                     renderDashboardBarChart(null);
                 }
             } catch (e) {
-                console.error("Dashboard Tracking Error:", e);
                 renderDashboardBarChart(null);
             }
         }
@@ -858,7 +820,7 @@
                 orderKeys.forEach((k, index) => {
                     let t = stats[k].total;
                     let d = stats[k].done;
-                    let m = Math.ceil(t * 0.60); // เป้าขั้นต่ำ 60%
+                    let m = Math.ceil(t * 0.60); 
                     
                     dataTotals[index] = t;
                     dataMins[index] = m;
@@ -869,7 +831,6 @@
                     sumDone += d;
                 });
 
-                // ช่องที่ 5 คือ ผลรวมทั้งหมด
                 dataTotals[4] = sumTotal;
                 dataMins[4] = sumMin;
                 dataDones[4] = sumDone;
@@ -883,24 +844,9 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            label: 'เป้าหมายทั้งหมด',
-                            data: dataTotals,
-                            backgroundColor: '#e2e8f0', // สีเทาอ่อน
-                            borderRadius: 4,
-                        },
-                        {
-                            label: 'ขั้นต่ำ (60%)',
-                            data: dataMins,
-                            backgroundColor: '#93c5fd', // สีฟ้า
-                            borderRadius: 4,
-                        },
-                        {
-                            label: 'ประเมินแล้ว',
-                            data: dataDones,
-                            backgroundColor: '#34d399', // สีเขียว
-                            borderRadius: 4,
-                        }
+                        { label: 'เป้าหมายทั้งหมด', data: dataTotals, backgroundColor: '#e2e8f0', borderRadius: 4 },
+                        { label: 'ขั้นต่ำ (60%)', data: dataMins, backgroundColor: '#93c5fd', borderRadius: 4 },
+                        { label: 'ประเมินแล้ว', data: dataDones, backgroundColor: '#34d399', borderRadius: 4 }
                     ]
                 },
                 options: {
@@ -909,26 +855,19 @@
                     plugins: {
                         legend: { position: 'top', labels: { font: { family: 'Sarabun' } } },
                         datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            color: '#475569',
+                            anchor: 'end', align: 'top', color: '#475569',
                             font: { weight: 'bold', family: 'Sarabun' },
-                            formatter: function(value) {
-                                return value > 0 ? value : ''; // ไม่แสดงเลข 0
-                            }
+                            formatter: function(value) { return value > 0 ? value : ''; }
                         }
                     },
                     scales: {
                         y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
                         x: { grid: { display: false }, ticks: { font: { family: 'Sarabun', weight: 'bold' } } }
                     },
-                    layout: {
-                        padding: { top: 20 } // เว้นที่ให้ DataLabels ด้านบน
-                    }
+                    layout: { padding: { top: 20 } }
                 }
             });
         }
-
 
         // ------------------ ระบบ Tracking (Upload) ------------------
         async function handleFileUpload(type) {
@@ -1048,31 +987,19 @@
                     let p1 = r['ส่วนที่ 1']; 
                     let p2 = r['ส่วนที่ 2'];
 
-                    if(!p1 && !p2 && !rGroup) { 
-                        status = "not_started"; 
-                    }
-                    else if(!p1 || !p2) { 
-                        status = "incomplete"; 
-                    }
+                    if(!p1 && !p2 && !rGroup) { status = "not_started"; }
+                    else if(!p1 || !p2) { status = "incomplete"; }
                     else {
                         status = "ปกติ"; // ทำครบแล้ว
                         if(stats[mGroup] !== undefined) stats[mGroup].done++;
                     }
 
-                    if(rGroup && mGroup !== rGroup) { 
-                        status = "wrong_group"; 
-                    }
+                    if(rGroup && mGroup !== rGroup) { status = "wrong_group"; }
                 }
 
                 detailedReportData.push({ 
-                    no: mNo,
-                    sId: sId, 
-                    name: mName, 
-                    position: mPos, 
-                    area: mArea, 
-                    mGroup: mGroup, 
-                    rGroup: r ? (String(r['กลุ่ม'] || '-')) : '-', 
-                    status: status 
+                    no: mNo, sId: sId, name: mName, position: mPos, 
+                    area: mArea, mGroup: mGroup, rGroup: r ? (String(r['กลุ่ม'] || '-')) : '-', status: status 
                 });
             });
             
@@ -1095,21 +1022,15 @@
             let rowHTML = '<tr class="bg-white">';
 
             orderKeys.forEach(k => {
-                let total = stats[k].total; 
-                let done = stats[k].done; 
-                let minReq = Math.ceil(total * 0.60); 
+                let total = stats[k].total; let done = stats[k].done; let minReq = Math.ceil(total * 0.60); 
                 let pct = total > 0 ? ((done/total)*100).toFixed(2) : '0.00';
                 
-                sumTotal += total; 
-                sumDone += done; 
-                sumMin += minReq;
-                
+                sumTotal += total; sumDone += done; sumMin += minReq;
                 rowHTML += `<td class="p-3 border">${total}</td><td class="p-3 border text-blue-600 font-bold">${minReq}</td><td class="p-3 border text-green-600 font-bold">${done}</td><td class="p-3 border">${pct}</td>`;
             });
             
             let sumPct = sumTotal > 0 ? ((sumDone/sumTotal)*100).toFixed(2) : '0.00';
             rowHTML += `<td class="p-3 border font-bold bg-slate-50">${sumTotal}</td><td class="p-3 border text-blue-600 font-bold bg-slate-50">${sumMin}</td><td class="p-3 border text-green-600 font-bold bg-slate-50">${sumDone}</td><td class="p-3 border font-bold bg-slate-50">${sumPct}</td></tr>`;
-            
             tbody.innerHTML = rowHTML;
         }
 
@@ -1153,7 +1074,6 @@
             const filter = document.getElementById('filterStatus').value;
             let filtered = detailedReportData;
             if(filter !== 'all') filtered = detailedReportData.filter(d => d.status === filter);
-            
             if(filtered.length === 0) return Swal.fire('ไม่พบข้อมูล', 'ไม่มีข้อมูลสำหรับเงื่อนไขที่เลือก', 'warning');
 
             const excelData = filtered.map((d) => ({
