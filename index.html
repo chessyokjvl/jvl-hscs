@@ -140,10 +140,30 @@
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-xl font-bold text-green-700"><i class="fas fa-poll"></i> ความคืบหน้าการตอบแบบประเมิน</h3>
                             <select id="dashTrackYear" class="border p-2 rounded outline-none font-bold text-green-700 shadow-sm" onchange="loadDashboardTracking()">
-                                <option value="2569">ปี 2569</option><option value="2570">ปี 2570</option><option value="2571">ปี 2571</option>
+                                <option value="2569">ปี 2569</option>
+                                <option value="2570">ปี 2570</option>
+                                <option value="2571">ปี 2571</option>
                             </select>
                         </div>
                         <div class="relative w-full" style="height: 350px;"><canvas id="trackingChart"></canvas></div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow mb-8 border-t-4 border-indigo-500">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                            <h3 class="text-xl font-bold text-indigo-800"><i class="fas fa-th-large"></i> ร้อยละคำตอบเชิงบวก (% Positive Response) จำแนกตามมิติ</h3>
+                            <select id="gridTemplateYear" class="border p-2 rounded outline-none font-bold text-indigo-700 shadow-sm" onchange="renderGridTemplate()">
+                                </select>
+                        </div>
+                        
+                        <div id="gridTemplateArea" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-[2px] bg-gray-300 border border-gray-300 rounded overflow-hidden shadow-inner">
+                            </div>
+                        
+                        <div class="mt-4 flex flex-wrap gap-4 text-xs font-bold justify-center md:justify-start">
+                            <span class="flex items-center gap-1"><div class="w-4 h-4 bg-emerald-500 rounded-sm"></div> ควรส่งเสริม (>= 80)</span>
+                            <span class="flex items-center gap-1"><div class="w-4 h-4 bg-yellow-400 rounded-sm"></div> ควรพัฒนาต่อเนื่อง (70-79.9)</span>
+                            <span class="flex items-center gap-1"><div class="w-4 h-4 bg-orange-500 rounded-sm"></div> เร่งพัฒนา (60-69.9)</span>
+                            <span class="flex items-center gap-1"><div class="w-4 h-4 bg-red-600 rounded-sm"></div> ควรพัฒนาด่วน (< 60)</span>
+                        </div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow mb-8 border-t-4 border-yellow-500">
@@ -152,7 +172,7 @@
                     </div>
 
                     <h3 class="text-xl font-bold text-blue-900 mb-4 border-b-2 border-blue-200 pb-2">แนวโน้มคะแนนเฉลี่ยรายมิติ</h3>
-                    <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10"></div>
+                    <div id="dashboardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10"></div>
                 </div>
 
                 <div id="configQuestionPage" class="page-section hidden">
@@ -170,17 +190,21 @@
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-layer-group"></i> 1. จัดการมิติการประเมิน</h3>
                         <div class="flex flex-col md:flex-row gap-4 mb-4">
                             <input type="hidden" id="oldDimNo">
-                            <input type="number" id="dimNo" placeholder="ลำดับมิติ" class="border p-2 rounded md:w-1/4 outline-none">
+                            <input type="number" id="dimNo" placeholder="ลำดับมิติ (เช่น 1)" class="border p-2 rounded md:w-1/4 outline-none">
                             <input type="text" id="dimName" placeholder="ชื่อมิติการประเมิน" class="border p-2 rounded flex-grow outline-none">
                             <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-save"></i> บันทึกมิติ</button>
                             <button onclick="clearDimForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                         </div>
-                        <div class="overflow-x-auto border rounded"><table class="w-full text-left text-sm" id="dimTable"><thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead><tbody></tbody></table></div>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="dimTable">
+                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-list-ul"></i> 2. จัดการข้อย่อย</h3>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
                             <input type="hidden" id="oldQCode">
                             <select id="qDimSelect" class="border p-2 rounded outline-none md:col-span-2"><option value="">-- เลือกลำดับและชื่อมิติ --</option></select>
@@ -199,7 +223,12 @@
                                 <button onclick="clearQForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto border rounded"><table class="w-full text-left text-sm" id="qTable"><thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead><tbody></tbody></table></div>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="qTable">
+                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -258,7 +287,10 @@
                         </div>
                         <div id="masterStatusCard" class="mt-6 p-4 rounded-lg bg-gray-50 border hidden">
                             <div class="flex justify-between items-center">
-                                <div><h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลบุคลากรในระบบแล้ว</h4><p class="text-sm text-gray-600 mt-1" id="masterTimeText">อัพโหลดเมื่อ: -</p></div>
+                                <div>
+                                    <h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลบุคลากรในระบบแล้ว</h4>
+                                    <p class="text-sm text-gray-600 mt-1" id="masterTimeText">อัพโหลดเมื่อ: -</p>
+                                </div>
                                 <div><button onclick="deleteUpload('master')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button></div>
                             </div>
                         </div>
@@ -280,7 +312,10 @@
                         </div>
                         <div id="recordStatusCard" class="mt-6 p-4 rounded-lg bg-gray-50 border hidden">
                             <div class="flex justify-between items-center">
-                                <div><h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลการตอบแบบประเมินล่าสุดแล้ว</h4><p class="text-sm text-gray-600 mt-1" id="recordTimeText">อัพโหลดเมื่อ: -</p></div>
+                                <div>
+                                    <h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลการตอบแบบประเมินล่าสุดแล้ว</h4>
+                                    <p class="text-sm text-gray-600 mt-1" id="recordTimeText">อัพโหลดเมื่อ: -</p>
+                                </div>
                                 <div><button onclick="deleteUpload('record')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button></div>
                             </div>
                         </div>
@@ -420,7 +455,7 @@
             document.getElementById('mainApp').classList.remove('hidden');
             document.getElementById('userProfile').innerHTML = `<i class="fas fa-user-circle mr-2 text-lg"></i> ${currentUser.username} <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">${currentUser.role}</span>`;
             if(currentUser.role === 'Admin') document.getElementById('adminMenu').classList.remove('hidden');
-            switchVersion('v10'); // เรียกค่าเริ่มต้น และมันจะสลับไปหน้า Dashboard ให้
+            switchVersion('v10'); 
             Swal.close();
         }
 
@@ -443,10 +478,8 @@
         // ------------------ ระบบ Version Toggle ------------------
         function switchVersion(ver) {
             activeVersion = ver;
-            // สลับปุ่ม UI บน Dashboard
             document.getElementById('dashTab-v10').className = ver === 'v10' ? "px-4 py-2 bg-blue-600 text-white font-bold transition" : "px-4 py-2 bg-gray-200 text-gray-600 font-bold hover:bg-gray-300 transition";
             document.getElementById('dashTab-v12').className = ver === 'v12' ? "px-4 py-2 bg-blue-600 text-white font-bold transition border-l border-blue-700" : "px-4 py-2 bg-gray-200 text-gray-600 font-bold hover:bg-gray-300 transition border-l";
-            // สลับปุ่ม UI บนหน้าบันทึก
             document.getElementById('resTab-v10').className = ver === 'v10' ? "px-4 py-2 bg-blue-600 text-white font-bold transition" : "px-4 py-2 bg-gray-200 text-gray-600 font-bold hover:bg-gray-300 transition";
             document.getElementById('resTab-v12').className = ver === 'v12' ? "px-4 py-2 bg-blue-600 text-white font-bold transition border-l border-blue-700" : "px-4 py-2 bg-gray-200 text-gray-600 font-bold hover:bg-gray-300 transition border-l";
 
@@ -454,7 +487,6 @@
             if(!document.getElementById('saveResultPage').classList.contains('hidden')) switchPage('saveResult');
         }
 
-        // ดึงปีอ้างอิงให้แม่นยำ
         function getRefYear() {
             if(globalDimensions.length === 0) return activeVersion === 'v10' ? 2569 : 2567;
             if(activeVersion === 'v10') {
@@ -529,11 +561,19 @@
             }
         }
 
-        // ------------------ ระบบคะแนน (ตาราง 6 ปี & กราฟ Dashboard) รองรับ Versioning & Reverse Score ------------------
+        // ------------------ ระบบคะแนน (ตาราง 6 ปี & กราฟ Dashboard) ------------------
         function getScoreColorClass(score) {
             if(score === null || score === '' || isNaN(score)) return '';
             if(score >= 80) return 'score-green'; if(score >= 70) return 'score-yellow';
             if(score >= 60) return 'score-orange'; return 'score-red';
+        }
+
+        // Helper สำหรับ Template Grid (สีพื้นหลัง)
+        function getBgColorClassForGrid(score) {
+            if(score >= 80) return 'bg-emerald-500 text-white'; 
+            if(score >= 70) return 'bg-yellow-400 text-slate-900';
+            if(score >= 60) return 'bg-orange-500 text-white'; 
+            return 'bg-red-600 text-white';
         }
 
         async function loadScoreData(mode) {
@@ -554,18 +594,15 @@
             let refYear = getRefYear();
             let activeYears = activeVersion === 'v10' ? V10_YEARS : V12_YEARS;
 
-            // อัพเดท Dropdown เลือกปีสำหรับบันทึกผล
             const yearSel = document.getElementById('resYear'); yearSel.innerHTML = '';
             activeYears.forEach(y => yearSel.innerHTML += `<option value="${y}" ${y==activeYears[0]?'selected':''}>${y}</option>`);
 
             let currentDims = globalDimensions.filter(d => d.year == refYear);
             let currentQs = globalQuestions.filter(q => q.year == refYear).sort((a,b) => a.dimNo - b.dimNo || a.code.localeCompare(b.code));
 
-            // อัพเดท Dropdown เลือกข้อ
             const sel = document.getElementById('resCode'); sel.innerHTML = '<option value="">-- เลือกข้อคำถาม --</option>';
             currentQs.forEach(q => sel.innerHTML += `<option value="${q.code}">[${q.code}] ${q.text.substring(0,80)}... ${q.isNegative ? '(เชิงลบ)' : ''}</option>`);
 
-            // อัพเดทหัวตาราง
             const thead = document.getElementById('resultTableHead');
             let headHTML = `<tr><th class="p-3 w-1/4">มิติการประเมิน</th><th class="p-3 w-1/3">รายการข้อย่อย</th>`;
             activeYears.forEach(y => headHTML += `<th class="p-3 text-center w-20">${y}</th>`);
@@ -574,7 +611,6 @@
 
             const tbody = document.getElementById('resultTable').querySelector('tbody'); tbody.innerHTML = '';
             
-            // ประมวลผลคะแนนภาพรวมทั้งหมด
             let overallTr = document.createElement('tr');
             overallTr.className = "bg-blue-100 font-bold text-blue-900 border-b-4 border-blue-300";
             overallTr.innerHTML = `<td colspan="2" class="p-3 text-right">คะแนนเฉลี่ยภาพรวมทั้งหมดทุกมิติ:</td>`;
@@ -582,7 +618,7 @@
                 let validScores = [];
                 currentQs.forEach(q => {
                     let r = globalResults.find(res => res.year == y && res.code == q.code);
-                    if(r) validScores.push(q.isNegative ? (100 - r.score) : r.score); // คำนวณแบบกลับค่า
+                    if(r) validScores.push(q.isNegative ? (100 - r.score) : r.score); 
                 });
                 let avg = validScores.length > 0 ? (validScores.reduce((a,b)=>a+b,0)/validScores.length).toFixed(1) : '-';
                 let colorClass = avg !== '-' ? getScoreColorClass(parseFloat(avg)) : 'text-gray-400';
@@ -590,7 +626,6 @@
             });
             tbody.appendChild(overallTr);
 
-            // วาดรายมิติ
             currentDims.forEach(dim => {
                 let qs = currentQs.filter(q => q.dimNo === dim.no);
                 if(qs.length === 0) return;
@@ -637,6 +672,12 @@
             let currentDims = globalDimensions.filter(d => d.year == refYear).sort((a,b)=>a.no-b.no);
             let currentQs = globalQuestions.filter(q => q.year == refYear);
             
+            // 0. อัพเดท Dropdown ในส่วนของ Grid Template
+            const gridYearSel = document.getElementById('gridTemplateYear');
+            gridYearSel.innerHTML = '';
+            activeYears.forEach(y => gridYearSel.innerHTML += `<option value="${y}" ${y==refYear?'selected':''}>ปี ${y}</option>`);
+            renderGridTemplate(); // วาดตารางกริด Template สี
+
             // 1. กราฟภาพรวม (Overall Score)
             let overallAverages = [];
             activeYears.forEach(y => {
@@ -719,6 +760,60 @@
                         scales: { y: { min: 40, max: 100, ticks: { stepSize: 20 }, grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } 
                     }
                 });
+            });
+        }
+
+        // ------------------ ระบบ Grid Template (แสดงข้อมูล % แบบบล็อกสี) ------------------
+        function renderGridTemplate() {
+            const year = document.getElementById('gridTemplateYear').value;
+            const area = document.getElementById('gridTemplateArea');
+            area.innerHTML = '';
+
+            let refYear = getRefYear(); 
+            // หากปีที่เลือกยังไม่มีการตั้งค่ามิติ ให้ดึงของ refYear มาโชว์เป็นโครงร่าง
+            let currentDims = globalDimensions.filter(d => d.year == year).sort((a,b)=>a.no-b.no);
+            let currentQs = globalQuestions.filter(q => q.year == year);
+
+            if(currentDims.length === 0) {
+                 currentDims = globalDimensions.filter(d => d.year == refYear).sort((a,b)=>a.no-b.no);
+                 currentQs = globalQuestions.filter(q => q.year == refYear);
+            }
+
+            currentDims.forEach(d => {
+                let qs = currentQs.filter(q => q.dimNo === d.no).sort((a,b)=>a.code.localeCompare(b.code));
+                let validScores = [];
+                let qsHtml = '';
+
+                qs.forEach(q => {
+                    let r = globalResults.find(res => res.year == year && res.code == q.code);
+                    let scoreText = '0.0%';
+                    if(r) {
+                        let effScore = q.isNegative ? (100 - r.score) : r.score;
+                        validScores.push(effScore);
+                        scoreText = effScore.toFixed(1) + '%';
+                    }
+                    qsHtml += `
+                        <div class="flex flex-col items-center justify-center p-1 w-1/3">
+                            <span class="font-bold text-xs uppercase">${q.code}</span>
+                            <span class="text-xs whitespace-nowrap">${scoreText}</span>
+                        </div>
+                    `;
+                });
+
+                let avg = validScores.length > 0 ? (validScores.reduce((a,b)=>a+b,0)/validScores.length) : 0;
+                let bgClass = getBgColorClassForGrid(avg);
+
+                area.innerHTML += `
+                    <div class="${bgClass} p-3 flex flex-col justify-between min-h-[160px] transition hover:opacity-90">
+                        <div class="text-center mb-2">
+                            <div class="font-bold text-sm leading-tight mb-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${d.name}">${d.no}. ${d.name}</div>
+                            <div class="text-2xl font-bold">${avg > 0 ? avg.toFixed(1) : '0.0'}%</div>
+                        </div>
+                        <div class="flex justify-center flex-wrap border-t border-current/30 pt-2 mt-auto">
+                            ${qsHtml}
+                        </div>
+                    </div>
+                `;
             });
         }
 
@@ -919,7 +1014,6 @@
             });
         }
 
-        // --- ระบบ Export & Print ---
         function exportToExcel() {
             const filter = document.getElementById('filterStatus').value; let filtered = detailedReportData;
             if(filter !== 'all') filtered = detailedReportData.filter(d => d.status === filter);
