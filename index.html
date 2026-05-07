@@ -37,7 +37,7 @@
 </head>
 <body class="bg-slate-50">
 
-    <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-jvl px-4">
+    <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-jvl px-4 hidden">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 transform transition-all relative">
             <div id="loginSection">
                 <div class="text-center mb-8">
@@ -114,7 +114,7 @@
                 </div>
 
                 <div id="adminMenu" class="p-3 hover:bg-blue-700 rounded cursor-pointer hidden transition" onclick="switchPage('manageUsers')"><i class="fas fa-user-shield mr-3"></i> จัดการ User</div>
-                <div class="p-3 hover:bg-red-700 rounded cursor-pointer mt-auto transition" onclick="location.reload()"><i class="fas fa-sign-out-alt mr-3"></i> Log out</div>
+                <div class="p-3 hover:bg-red-700 rounded cursor-pointer mt-auto transition" onclick="logout()"><i class="fas fa-sign-out-alt mr-3"></i> Log out</div>
             </nav>
         </aside>
 
@@ -157,11 +157,9 @@
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                             <h3 class="text-xl font-bold text-indigo-800"><i class="fas fa-th-large"></i> ร้อยละคำตอบเชิงบวก (% Positive Response) จำแนกตามมิติ</h3>
                             <select id="gridTemplateYear" class="border p-2 rounded outline-none font-bold text-indigo-700 shadow-sm" onchange="renderGridTemplate()">
-                                </select>
+                            </select>
                         </div>
-                        
-                        <div id="gridTemplateArea" class="grid gap-[2px] bg-gray-300 border border-gray-300 rounded overflow-hidden shadow-inner">
-                            </div>
+                        <div id="gridTemplateArea" class="grid gap-[2px] bg-gray-300 border border-gray-300 rounded overflow-hidden shadow-inner"></div>
                         
                         <div class="mt-4 flex flex-wrap gap-4 text-xs font-bold justify-center md:justify-start">
                             <span class="flex items-center gap-1"><div class="w-4 h-4 bg-emerald-500 rounded-sm"></div> ควรส่งเสริม (>= 80)</span>
@@ -195,7 +193,12 @@
                             <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-save"></i> บันทึกมิติ</button>
                             <button onclick="clearDimForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                         </div>
-                        <div class="overflow-x-auto border rounded"><table class="w-full text-left text-sm" id="dimTable"><thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead><tbody></tbody></table></div>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="dimTable">
+                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
@@ -219,7 +222,12 @@
                                 <button onclick="clearQForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto border rounded"><table class="w-full text-left text-sm" id="qTable"><thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead><tbody></tbody></table></div>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full text-left text-sm" id="qTable">
+                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -255,8 +263,7 @@
                     <div class="bg-white rounded-xl shadow overflow-hidden pb-4">
                         <div class="overflow-x-auto max-h-[600px]">
                             <table class="w-full text-left text-sm" id="resultTable">
-                                <thead class="bg-blue-900 text-white sticky top-0 z-10 shadow" id="resultTableHead">
-                                    </thead>
+                                <thead class="bg-blue-900 text-white sticky top-0 z-10 shadow" id="resultTableHead"></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -278,7 +285,10 @@
                         </div>
                         <div id="masterStatusCard" class="mt-6 p-4 rounded-lg bg-gray-50 border hidden">
                             <div class="flex justify-between items-center">
-                                <div><h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลบุคลากรในระบบแล้ว</h4><p class="text-sm text-gray-600 mt-1" id="masterTimeText">อัพโหลดเมื่อ: -</p></div>
+                                <div>
+                                    <h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลบุคลากรในระบบแล้ว</h4>
+                                    <p class="text-sm text-gray-600 mt-1" id="masterTimeText">อัพโหลดเมื่อ: -</p>
+                                </div>
                                 <div><button onclick="deleteUpload('master')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button></div>
                             </div>
                         </div>
@@ -300,7 +310,10 @@
                         </div>
                         <div id="recordStatusCard" class="mt-6 p-4 rounded-lg bg-gray-50 border hidden">
                             <div class="flex justify-between items-center">
-                                <div><h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลการตอบแบบประเมินล่าสุดแล้ว</h4><p class="text-sm text-gray-600 mt-1" id="recordTimeText">อัพโหลดเมื่อ: -</p></div>
+                                <div>
+                                    <h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลการตอบแบบประเมินล่าสุดแล้ว</h4>
+                                    <p class="text-sm text-gray-600 mt-1" id="recordTimeText">อัพโหลดเมื่อ: -</p>
+                                </div>
                                 <div><button onclick="deleteUpload('record')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button></div>
                             </div>
                         </div>
@@ -382,8 +395,8 @@
         // Versioning Setup
         let activeVersion = 'v10'; // เปิดมาค่าตั้งต้นเป็น V10 
         const V12_YEARS = [2564, 2565, 2566, 2567];
-        const V10_YEARS = [2568, 2569, 2570]; // รองรับอนาคตไปเลย
-        const YEARS = [2564, 2565, 2566, 2567, 2568, 2569]; // สำหรับ Overall Score ทุกปี
+        const V10_YEARS = [2568, 2569, 2570]; 
+        const YEARS = [2564, 2565, 2566, 2567, 2568, 2569]; 
         
         let currentUser = null;
         let globalDimensions = [];
@@ -394,6 +407,17 @@
         let globalUsers = []; 
 
         Chart.register(ChartDataLabels);
+
+        // ------------------ ระบบ Auto Login ------------------
+        window.onload = () => {
+            const savedUser = localStorage.getItem('jvl_hscs_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                initApp();
+            } else {
+                document.getElementById('loginPage').classList.remove('hidden');
+            }
+        };
 
         // ------------------ ระบบ UI & Login ------------------
         function toggleAuthView(sectionId) {
@@ -410,7 +434,11 @@
             try {
                 const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'login', username: user, password: pass }) });
                 const result = await res.json();
-                if(result.status === 'success') { currentUser = result.user; initApp(); } 
+                if(result.status === 'success') { 
+                    currentUser = result.user; 
+                    localStorage.setItem('jvl_hscs_user', JSON.stringify(currentUser)); // บันทึก Login
+                    initApp(); 
+                } 
                 else { Swal.fire('ผิดพลาด', result.message, 'error'); }
             } catch (e) { Swal.fire('ผิดพลาด', 'ติดต่อ Server ไม่ได้', 'error'); }
         }
@@ -434,7 +462,16 @@
             Swal.fire((await res.json()).status === 'success' ? 'สำเร็จ' : 'ผิดพลาด', (await res.json()).message, (await res.json()).status);
         }
 
-        function guestLogin() { currentUser = { username: 'Guest', role: 'Guest' }; initApp(); }
+        function guestLogin() { 
+            currentUser = { username: 'Guest', role: 'Guest' }; 
+            localStorage.setItem('jvl_hscs_user', JSON.stringify(currentUser)); // บันทึก Login แบบ Guest
+            initApp(); 
+        }
+
+        function logout() {
+            localStorage.removeItem('jvl_hscs_user');
+            location.reload();
+        }
 
         function initApp() {
             document.getElementById('loginPage').classList.add('hidden');
@@ -663,12 +700,15 @@
             activeYears.forEach(y => gridYearSel.innerHTML += `<option value="${y}" ${y==refYear?'selected':''}>ปี ${y}</option>`);
             renderGridTemplate();
 
-            // 1. กราฟภาพรวม (Overall Score) - ดึงข้อมูลทุกปี (YEARS = 2564-2569)
+            // 1. กราฟภาพรวม (Overall Score) - ดึงข้อมูลทุกปี โดยดึงชุดข้อคำถามอ้างอิงของแต่ละ Version ให้อัตโนมัติ
             let overallAverages = [];
             YEARS.forEach(y => {
                 let validScores = [];
-                // ใช้คำถามของปีนั้นๆ ในการคำนวณ เพื่อความแม่นยำ
-                let qsForYear = globalQuestions.filter(q => q.year == y);
+                let targetVer = y >= 2568 ? 'v10' : 'v12';
+                let dYears = globalDimensions.filter(d => targetVer === 'v10' ? d.year >= 2568 : d.year <= 2567).map(d => d.year);
+                let refY = dYears.length > 0 ? Math.max(...dYears) : (targetVer === 'v10' ? 2569 : 2567);
+                
+                let qsForYear = globalQuestions.filter(q => q.year == refY);
                 qsForYear.forEach(q => {
                     let r = globalResults.find(res => res.year == y && res.code == q.code);
                     if(r) validScores.push(q.isNegative ? (100 - r.score) : r.score);
@@ -705,7 +745,7 @@
                 }
             });
 
-            // 2. กราฟ 10/12 มิติ (ใช้ activeYears ตาม Version ที่เลือก)
+            // 2. กราฟ 10/12 มิติ (แสดงเฉพาะช่วงปีของ Version นั้นๆ)
             let dimAverages = {};
             currentDims.forEach(d => {
                 dimAverages[d.no] = { name: d.name, data: [] };
@@ -756,7 +796,8 @@
             const area = document.getElementById('gridTemplateArea');
             area.innerHTML = '';
 
-            // ปรับ Layout อัตโนมัติ: ถ้า <= 2567 (12 มิติ) ให้เป็น 4 คอลัมน์, ถ้า >= 2568 (10 มิติ) ให้เป็น 5 คอลัมน์
+            // ถ้าเป็น <= 2567 (12 มิติ) แสดงเป็น 4x3 (lg:grid-cols-4)
+            // ถ้าเป็น >= 2568 (10 มิติ) แสดงเป็น 5x2 (lg:grid-cols-5)
             if (year <= 2567) {
                 area.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[2px] bg-gray-300 border border-gray-300 rounded overflow-hidden shadow-inner";
             } else {
