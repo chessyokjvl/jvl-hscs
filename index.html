@@ -128,12 +128,17 @@
                 
                 <div id="dashboardPage" class="page-section">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                        <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">Dashboard ภาพรวมผลประเมิน</h2>
+                        <h2 class="text-2xl font-bold text-blue-900 border-l-4 border-blue-900 pl-3">Dashboard ภาพรวมผลประเมินวัฒนธรรมความปลอดภัย</h2>
                         
                         <div class="flex border rounded-lg overflow-hidden shadow-sm">
                             <button id="dashTab-v10" onclick="switchVersion('v10')" class="px-4 py-2 font-bold transition">ชุด 10 มิติ (ปี 2568-ปัจจุบัน)</button>
                             <button id="dashTab-v12" onclick="switchVersion('v12')" class="px-4 py-2 font-bold transition border-l">ชุด 12 มิติ (ปี 2564-2567)</button>
                         </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow mb-8 border-t-4 border-yellow-500">
+                        <h3 class="text-xl font-bold text-yellow-600 mb-4"><i class="fas fa-star"></i> แนวโน้มคะแนนเฉลี่ยภาพรวมทั้งหมด (Overall Score 2564 - ปัจจุบัน)</h3>
+                        <div class="relative w-full" style="height: 350px;"><canvas id="overallScoreChart"></canvas></div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow mb-8 border-t-4 border-green-500">
@@ -155,7 +160,7 @@
                                 </select>
                         </div>
                         
-                        <div id="gridTemplateArea" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-[2px] bg-gray-300 border border-gray-300 rounded overflow-hidden shadow-inner">
+                        <div id="gridTemplateArea" class="grid gap-[2px] bg-gray-300 border border-gray-300 rounded overflow-hidden shadow-inner">
                             </div>
                         
                         <div class="mt-4 flex flex-wrap gap-4 text-xs font-bold justify-center md:justify-start">
@@ -164,11 +169,6 @@
                             <span class="flex items-center gap-1"><div class="w-4 h-4 bg-orange-500 rounded-sm"></div> เร่งพัฒนา (60-69.9)</span>
                             <span class="flex items-center gap-1"><div class="w-4 h-4 bg-red-600 rounded-sm"></div> ควรพัฒนาด่วน (< 60)</span>
                         </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-xl shadow mb-8 border-t-4 border-yellow-500">
-                        <h3 class="text-xl font-bold text-yellow-600 mb-4"><i class="fas fa-star"></i> แนวโน้มคะแนนเฉลี่ยภาพรวมทั้งหมด (Overall Score)</h3>
-                        <div class="relative w-full" style="height: 350px;"><canvas id="overallScoreChart"></canvas></div>
                     </div>
 
                     <h3 class="text-xl font-bold text-blue-900 mb-4 border-b-2 border-blue-200 pb-2">แนวโน้มคะแนนเฉลี่ยรายมิติ</h3>
@@ -195,16 +195,12 @@
                             <button onclick="saveDimension()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow transition"><i class="fas fa-save"></i> บันทึกมิติ</button>
                             <button onclick="clearDimForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                         </div>
-                        <div class="overflow-x-auto border rounded">
-                            <table class="w-full text-left text-sm" id="dimTable">
-                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                        <div class="overflow-x-auto border rounded"><table class="w-full text-left text-sm" id="dimTable"><thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">ลำดับ</th><th class="p-3">ชื่อมิติ</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead><tbody></tbody></table></div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow mb-6">
                         <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-list-ul"></i> 2. จัดการข้อย่อย</h3>
+                        
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
                             <input type="hidden" id="oldQCode">
                             <select id="qDimSelect" class="border p-2 rounded outline-none md:col-span-2"><option value="">-- เลือกลำดับและชื่อมิติ --</option></select>
@@ -223,12 +219,7 @@
                                 <button onclick="clearQForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition">เคลียร์</button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto border rounded">
-                            <table class="w-full text-left text-sm" id="qTable">
-                                <thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                        <div class="overflow-x-auto border rounded"><table class="w-full text-left text-sm" id="qTable"><thead class="bg-slate-100 text-blue-900"><tr><th class="p-3 w-20 text-center">มิติที่</th><th class="p-3 w-24">รหัส</th><th class="p-3">รายการข้อย่อย</th><th class="p-3 w-32 text-center">จัดการ</th></tr></thead><tbody></tbody></table></div>
                     </div>
                 </div>
 
@@ -287,10 +278,7 @@
                         </div>
                         <div id="masterStatusCard" class="mt-6 p-4 rounded-lg bg-gray-50 border hidden">
                             <div class="flex justify-between items-center">
-                                <div>
-                                    <h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลบุคลากรในระบบแล้ว</h4>
-                                    <p class="text-sm text-gray-600 mt-1" id="masterTimeText">อัพโหลดเมื่อ: -</p>
-                                </div>
+                                <div><h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลบุคลากรในระบบแล้ว</h4><p class="text-sm text-gray-600 mt-1" id="masterTimeText">อัพโหลดเมื่อ: -</p></div>
                                 <div><button onclick="deleteUpload('master')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button></div>
                             </div>
                         </div>
@@ -312,10 +300,7 @@
                         </div>
                         <div id="recordStatusCard" class="mt-6 p-4 rounded-lg bg-gray-50 border hidden">
                             <div class="flex justify-between items-center">
-                                <div>
-                                    <h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลการตอบแบบประเมินล่าสุดแล้ว</h4>
-                                    <p class="text-sm text-gray-600 mt-1" id="recordTimeText">อัพโหลดเมื่อ: -</p>
-                                </div>
+                                <div><h4 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> มีข้อมูลการตอบแบบประเมินล่าสุดแล้ว</h4><p class="text-sm text-gray-600 mt-1" id="recordTimeText">อัพโหลดเมื่อ: -</p></div>
                                 <div><button onclick="deleteUpload('record')" class="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded transition"><i class="fas fa-trash"></i> ลบข้อมูล</button></div>
                             </div>
                         </div>
@@ -398,6 +383,7 @@
         let activeVersion = 'v10'; // เปิดมาค่าตั้งต้นเป็น V10 
         const V12_YEARS = [2564, 2565, 2566, 2567];
         const V10_YEARS = [2568, 2569, 2570]; // รองรับอนาคตไปเลย
+        const YEARS = [2564, 2565, 2566, 2567, 2568, 2569]; // สำหรับ Overall Score ทุกปี
         
         let currentUser = null;
         let globalDimensions = [];
@@ -568,7 +554,6 @@
             if(score >= 60) return 'score-orange'; return 'score-red';
         }
 
-        // Helper สำหรับ Template Grid (สีพื้นหลัง)
         function getBgColorClassForGrid(score) {
             if(score >= 80) return 'bg-emerald-500 text-white'; 
             if(score >= 70) return 'bg-yellow-400 text-slate-900';
@@ -676,13 +661,15 @@
             const gridYearSel = document.getElementById('gridTemplateYear');
             gridYearSel.innerHTML = '';
             activeYears.forEach(y => gridYearSel.innerHTML += `<option value="${y}" ${y==refYear?'selected':''}>ปี ${y}</option>`);
-            renderGridTemplate(); // วาดตารางกริด Template สี
+            renderGridTemplate();
 
-            // 1. กราฟภาพรวม (Overall Score)
+            // 1. กราฟภาพรวม (Overall Score) - ดึงข้อมูลทุกปี (YEARS = 2564-2569)
             let overallAverages = [];
-            activeYears.forEach(y => {
+            YEARS.forEach(y => {
                 let validScores = [];
-                currentQs.forEach(q => {
+                // ใช้คำถามของปีนั้นๆ ในการคำนวณ เพื่อความแม่นยำ
+                let qsForYear = globalQuestions.filter(q => q.year == y);
+                qsForYear.forEach(q => {
                     let r = globalResults.find(res => res.year == y && res.code == q.code);
                     if(r) validScores.push(q.isNegative ? (100 - r.score) : r.score);
                 });
@@ -695,7 +682,7 @@
             chartInstances['overall'] = new Chart(ctxOverall, {
                 type: 'line',
                 data: {
-                    labels: activeYears.map(String),
+                    labels: YEARS.map(String),
                     datasets: [{
                         label: 'คะแนนเฉลี่ยภาพรวม', data: overallAverages,
                         borderColor: '#ca8a04', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 3,
@@ -718,7 +705,7 @@
                 }
             });
 
-            // 2. กราฟ 10/12 มิติ
+            // 2. กราฟ 10/12 มิติ (ใช้ activeYears ตาม Version ที่เลือก)
             let dimAverages = {};
             currentDims.forEach(d => {
                 dimAverages[d.no] = { name: d.name, data: [] };
@@ -769,8 +756,14 @@
             const area = document.getElementById('gridTemplateArea');
             area.innerHTML = '';
 
+            // ปรับ Layout อัตโนมัติ: ถ้า <= 2567 (12 มิติ) ให้เป็น 4 คอลัมน์, ถ้า >= 2568 (10 มิติ) ให้เป็น 5 คอลัมน์
+            if (year <= 2567) {
+                area.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[2px] bg-gray-300 border border-gray-300 rounded overflow-hidden shadow-inner";
+            } else {
+                area.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-[2px] bg-gray-300 border border-gray-300 rounded overflow-hidden shadow-inner";
+            }
+
             let refYear = getRefYear(); 
-            // หากปีที่เลือกยังไม่มีการตั้งค่ามิติ ให้ดึงของ refYear มาโชว์เป็นโครงร่าง
             let currentDims = globalDimensions.filter(d => d.year == year).sort((a,b)=>a.no-b.no);
             let currentQs = globalQuestions.filter(q => q.year == year);
 
